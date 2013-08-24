@@ -29,11 +29,11 @@ import javax.net.SocketFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.github.common.http.NetUtils;
 import com.github.dtf.conf.Configuration;
 import com.github.dtf.rpc.RPC;
 import com.github.dtf.rpc.Writable;
 import com.github.dtf.security.UserGroupInformation;
-import com.github.dtf.utils.NetUtils;
 
 /** A client for an IPC service.  IPC calls take a single {@link Writable} as a
  * parameter, and return a {@link Writable} as their value.  A service runs on

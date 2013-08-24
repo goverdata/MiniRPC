@@ -26,6 +26,9 @@ import java.util.concurrent.atomic.AtomicLong;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.github.common.http.NetUtils;
+import com.github.common.utils.IOUtils;
+import com.github.common.utils.WritableUtils;
 import com.github.dtf.conf.Configuration;
 import com.github.dtf.io.DataOutputBuffer;
 import com.github.dtf.rpc.RpcPayloadHeaderProtos.RpcPayloadHeaderProto;
@@ -36,11 +39,8 @@ import com.github.dtf.rpc.Writable;
 import com.github.dtf.rpc.server.Server;
 import com.github.dtf.security.UserGroupInformation;
 import com.github.dtf.transport.RetryPolicy;
-import com.github.dtf.utils.IOUtils;
-import com.github.dtf.utils.NetUtils;
 import com.github.dtf.utils.ProtoUtil;
 import com.github.dtf.utils.ReflectionUtils;
-import com.github.dtf.utils.WritableUtils;
 
 
 /** Thread that reads responses and notifies callers.  Each connection owns a

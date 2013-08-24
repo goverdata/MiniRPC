@@ -19,6 +19,7 @@ import java.util.LinkedList;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.github.common.utils.WritableUtils;
 import com.github.dtf.conf.CommonConfigurationKeys;
 import com.github.dtf.exception.IpcException;
 import com.github.dtf.rpc.RPC;
@@ -31,7 +32,6 @@ import com.github.dtf.rpc.client.Client;
 import com.github.dtf.rpc.server.AbstractServer.IpcSerializationType;
 import com.github.dtf.utils.ProtoUtil;
 import com.github.dtf.utils.ReflectionUtils;
-import com.github.dtf.utils.WritableUtils;
 
 public class Connection {
 	public static final Log LOG = LogFactory.getLog(Connection.class);

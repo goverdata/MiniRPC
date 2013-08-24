@@ -40,6 +40,9 @@ import java.util.concurrent.LinkedBlockingQueue;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.github.common.http.NetUtils;
+import com.github.common.string.StringUtils;
+import com.github.common.utils.WritableUtils;
 import com.github.dtf.conf.CommonConfigurationKeys;
 import com.github.dtf.conf.CommonConfigurationKeysPublic;
 import com.github.dtf.conf.Configuration;
@@ -57,11 +60,8 @@ import com.github.dtf.rpc.RpcPayloadHeaderProtos.RpcStatusProto;
 import com.github.dtf.rpc.Writable;
 import com.github.dtf.rpc.client.Client;
 import com.github.dtf.security.UserGroupInformation;
-import com.github.dtf.utils.NetUtils;
 import com.github.dtf.utils.ProtoUtil;
 import com.github.dtf.utils.ReflectionUtils;
-import com.github.dtf.utils.StringUtils;
-import com.github.dtf.utils.WritableUtils;
 
 /**
  * An abstract IPC service. IPC calls take a single {@link Writable} as a

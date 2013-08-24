@@ -5,9 +5,9 @@ import java.io.ByteArrayOutputStream;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.github.common.string.StringUtils;
 import com.github.dtf.rpc.Writable;
 import com.github.dtf.rpc.RpcPayloadHeaderProtos.RpcStatusProto;
-import com.github.dtf.utils.StringUtils;
 
 /** Handles queued calls . */
 public class Handler extends Thread {

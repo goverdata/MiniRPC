@@ -16,7 +16,7 @@ import java.util.Random;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.github.dtf.utils.NetUtils;
+import com.github.common.http.NetUtils;
 
 /** Listens on the socket. Creates jobs for the handler threads */
 public class Listener extends Thread {
