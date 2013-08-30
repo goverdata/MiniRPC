@@ -139,7 +139,7 @@ public class Client {
    * @param conf
    */
   public Client(Class<? extends Writable> valueClass, Configuration conf) {
-    this(valueClass, conf, NetUtils.getDefaultSocketFactory(conf));
+    this(valueClass, conf, NetUtils.getDefaultSocketFactory());
   }
  
   /** Return the socket factory of this client

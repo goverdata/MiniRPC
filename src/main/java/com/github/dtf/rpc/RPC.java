@@ -171,8 +171,9 @@ public class RPC {
       Configuration conf) {
     RpcEngine engine = PROTOCOL_ENGINES.get(protocol);
     if (engine == null) {
-      Class<?> impl = conf.getClass(ENGINE_PROP+"."+protocol.getName(),
-                                    WritableRpcEngine.class);
+//      Class<?> impl = conf.getClass(ENGINE_PROP+"."+protocol.getName(),
+//                                    WritableRpcEngine.class);
+      Class<?> impl = ProtobufRpcEngine.class;
       engine = (RpcEngine)ReflectionUtils.newInstance(impl, conf);
       PROTOCOL_ENGINES.put(protocol, engine);
     }
