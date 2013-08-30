@@ -7,17 +7,11 @@
 	<repositories>
 		<repository>
 			<id>github-repo-releases</id>
-			<url>https://raw.github.com/zangxiaoqiang/MiniCommon/master/releases</url>
+			<url>https://raw.github.com/zangxiaoqiang/MiniMavenRepo/master/releases</url>
 		</repository>
 	</repositories>
 	
-  <distributionManagement>
-    <repository>
-			<id>github-repo-releases</id>
-			<url>https://raw.github.com/zangxiaoqiang/MiniCommon/master/releases</url>
-    </repository>
-	</distributionManagement>
-	
+
 	<dependencies>
 		<dependency>
 			<groupId>com.github.zangxiaoqiang</groupId>
