@@ -19,6 +19,8 @@ public interface Server {
 	public enum IpcSerializationType {
 		// Add new serialization type to the end without affecting the enum
 		// order
+		AVRO,
+		THRIFT,
 		PROTOBUF;
 
 		public void write(DataOutput out) throws IOException {
@@ -34,8 +36,7 @@ public interface Server {
 	 * If the user accidentally sends an HTTP GET to an IPC port, we detect this
 	 * and send back a nicer response.
 	 */
-	static final ByteBuffer HTTP_GET_BYTES = ByteBuffer.wrap("GET "
-			.getBytes());
+	static final ByteBuffer HTTP_GET_BYTES = ByteBuffer.wrap("GET ".getBytes());
 
 	/**
 	 * An HTTP response to send back if we detect an HTTP request to our IPC
@@ -53,7 +54,7 @@ public interface Server {
 	// in ObjectWritable to efficiently transmit arrays of primitives
 	// 6 : Made RPC payload header explicit
 	// 7 : Changed Ipc Connection Header to use Protocol buffers
-	public static final byte CURRENT_VERSION = 7;
+	public static final byte CURRENT_VERSION = 1;
 
 	/**
 	 * Initial and max size of response buffer

@@ -1,7 +1,6 @@
 package com.github.dtf.rpc.server;
 
 import java.io.IOException;
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
@@ -53,7 +52,7 @@ public class Listener extends Thread {
 	AbstractServer server;
 	boolean tcpNoDelay;
 
-	public Listener(AbstractServer server, InetAddress addr, int port, boolean tcpNoDelay) throws IOException {
+	public Listener(AbstractServer server, String addr, int port, boolean tcpNoDelay) throws IOException {
 		this.server = server;
 		this.tcpNoDelay = tcpNoDelay;
 		address = new InetSocketAddress(addr, port);

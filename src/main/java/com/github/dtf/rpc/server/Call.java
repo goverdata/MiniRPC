@@ -3,6 +3,7 @@ package com.github.dtf.rpc.server;
 import java.nio.ByteBuffer;
 
 import com.github.dtf.rpc.RPC;
+import com.github.dtf.rpc.RpcType;
 import com.github.dtf.rpc.Writable;
 
 /** A call queued for handling. */
@@ -14,13 +15,13 @@ public class Call {
 	private long timestamp; // time received when response is null
 							 // time served when response is not null
 	private ByteBuffer rpcResponse; // the response for this call
-	private final RPC.Type rpcKind;
+	private final RpcType rpcKind;
 
 	public Call(int id, Writable param, Connection connection) {
-		this(id, param, connection, RPC.Type.RPC_BUILTIN);
+		this(id, param, connection, RpcType.RPC_BUILTIN);
 	}
 
-	public Call(int id, Writable param, Connection connection, RPC.Type kind) {
+	public Call(int id, Writable param, Connection connection, RpcType kind) {
 		this.callId = id;
 		this.rpcRequest = param;
 		this.connection = connection;
@@ -53,7 +54,7 @@ public class Call {
 		this.rpcResponse = rpcResponse;
 	}
 
-	public RPC.Type getRpcKind() {
+	public RpcType getRpcKind() {
 		return rpcKind;
 	}
 	public Connection getConnection() {

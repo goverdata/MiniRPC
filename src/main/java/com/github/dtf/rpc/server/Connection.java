@@ -27,9 +27,10 @@ import com.github.dtf.rpc.RPC.VersionMismatch;
 import com.github.dtf.rpc.RpcPayloadHeaderProtos.RpcPayloadHeaderProto;
 import com.github.dtf.rpc.RpcPayloadHeaderProtos.RpcPayloadOperationProto;
 import com.github.dtf.rpc.RpcPayloadHeaderProtos.RpcStatusProto;
+import com.github.dtf.rpc.RpcType;
 import com.github.dtf.rpc.Writable;
 import com.github.dtf.rpc.client.Client;
-import com.github.dtf.rpc.server.AbstractServer.IpcSerializationType;
+import com.github.dtf.rpc.server.Server.IpcSerializationType;
 import com.github.dtf.utils.ProtoUtil;
 import com.github.dtf.utils.ReflectionUtils;
 
@@ -651,7 +652,7 @@ public class Connection {
 //		Call call = new Call(header.getCallId(), rpcRequest, this,
 //				ProtoUtil.convert(header.getRpcKind()));
 		//FIXME Just for test
-		Call call = new Call(header.getCallId(), rpcRequest, this,RPC.Type.RPC_WRITABLE);
+		Call call = new Call(header.getCallId(), rpcRequest, this,RpcType.RPC_WRITABLE);
 		server.getCallQueue().put(call); // queue the call; maybe blocked here
 		incRpcCount(); // Increment the rpc count
 	}

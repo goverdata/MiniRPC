@@ -25,11 +25,10 @@ import org.apache.hadoop.security.token.TokenIdentifier;
 
 import com.github.dtf.conf.Configuration;
 import com.github.dtf.protocol.ProtocolProxy;
-import com.github.dtf.rpc.AbstractServer.ProtoClassProtoImpl;
-import com.github.dtf.rpc.AbstractServer.ProtoNameVer;
-import com.github.dtf.rpc.AbstractServer.VerProtocolImpl;
 import com.github.dtf.rpc.client.Client;
 import com.github.dtf.rpc.client.ClientCache;
+import com.github.dtf.rpc.client.ConnectionId;
+import com.github.dtf.rpc.server.AbstractServer;
 import com.github.dtf.rpc.server.AbstractRpcServer;
 import com.github.dtf.security.UserGroupInformation;
 import com.github.dtf.transport.RetryPolicy;
@@ -45,9 +44,10 @@ import com.google.protobuf.TextFormat;
 public class ProtobufRpcEngine implements RpcEngine {
 	  public static final Log LOG = LogFactory.getLog(ProtobufRpcEngine.class);
 	  
-	  static { // Register the rpcRequest deserializer for WritableRpcEngine 
-	    org.apache.hadoop.ipc.Server.registerProtocolEngine(
-	        RPC.RpcKind.RPC_PROTOCOL_BUFFER, RpcRequestWritable.class,
+	  static { 
+		// Register the rpcRequest deserializer for WritableRpcEngine 
+	    AbstractServer.registerProtocolEngine(
+	        RPC.Type.RPC_PROTOCOL_BUFFER, RpcRequestWritable.class,
 	        new Server.ProtoBufRpcInvoker());
 	  }
 
@@ -60,12 +60,11 @@ public class ProtobufRpcEngine implements RpcEngine {
 	        rpcTimeout, null);
 	  }
 
-	  @Override
 	  @SuppressWarnings("unchecked")
 	  public <T> ProtocolProxy<T> getProxy(Class<T> protocol, long clientVersion,
-	      InetSocketAddress addr, UserGroupInformation ticket, Configuration conf,
-	      SocketFactory factory, int rpcTimeout, RetryPolicy connectionRetryPolicy
-	      ) throws IOException {
+				InetSocketAddress addr, UserGroupInformation ticket,
+				Configuration conf, SocketFactory factory, int rpcTimeout,
+				RetryPolicy connectionRetryPolicy) throws IOException {
 
 	    final Invoker invoker = new Invoker(protocol, addr, ticket, conf, factory,
 	        rpcTimeout, connectionRetryPolicy);
@@ -73,7 +72,6 @@ public class ProtobufRpcEngine implements RpcEngine {
 	        protocol.getClassLoader(), new Class[]{protocol}, invoker), false);
 	  }
 	  
-	  @Override
 	  public ProtocolProxy<ProtocolMetaInfoPB> getProtocolMetaInfoProxy(
 	      ConnectionId connId, Configuration conf, SocketFactory factory)
 	      throws IOException {
@@ -167,7 +165,6 @@ public class ProtobufRpcEngine implements RpcEngine {
 	     * cause is RemoteException, then unwrap it to get the exception thrown by
 	     * the server.
 	     */
-	    @Override
 	    public Object invoke(Object proxy, Method method, Object[] args)
 	        throws ServiceException {
 	      long startTime = 0;
@@ -266,13 +263,11 @@ public class ProtobufRpcEngine implements RpcEngine {
 	      this.message = message;
 	    }
 
-	    @Override
 	    public void write(DataOutput out) throws IOException {
 	      ((Message)message).writeDelimitedTo(
 	          DataOutputOutputStream.constructOutputStream(out));
 	    }
 
-	    @Override
 	    public void readFields(DataInput in) throws IOException {
 	      int length = ProtoUtil.readRawVarint32(in);
 	      byte[] bytes = new byte[length];
@@ -301,13 +296,11 @@ public class ProtobufRpcEngine implements RpcEngine {
 	      this.responseMessage = message.toByteArray();
 	    }
 
-	    @Override
 	    public void write(DataOutput out) throws IOException {
 	      out.writeInt(responseMessage.length);
 	      out.write(responseMessage);     
 	    }
 
-	    @Override
 	    public void readFields(DataInput in) throws IOException {
 	      int length = in.readInt();
 	      byte[] bytes = new byte[length];
@@ -326,15 +319,12 @@ public class ProtobufRpcEngine implements RpcEngine {
 	  
 	 
 
-	  @Override
 	  public AbstractRpcServer getServer(Class<?> protocol, Object protocolImpl,
-	      String bindAddress, int port, int numHandlers, int numReaders,
-	      int queueSizePerHandler, boolean verbose, Configuration conf,
-	      SecretManager<? extends TokenIdentifier> secretManager,
-	      String portRangeConfig)
-	      throws IOException {
-	    return new AbstractRpcServer(protocol, protocolImpl, conf, bindAddress, port,
-	        numHandlers, numReaders, queueSizePerHandler, verbose, secretManager,
+				String bindAddress, int port, int numHandlers, int numReaders,
+				int queueSizePerHandler, boolean verbose, Configuration conf,
+				String portRangeConfig) throws IOException {
+	    return new Server(protocol, protocolImpl, conf, bindAddress, port,
+	        numHandlers, numReaders, queueSizePerHandler,
 	        portRangeConfig);
 	  }
 	  
@@ -354,8 +344,8 @@ public class ProtobufRpcEngine implements RpcEngine {
 	     */
 	    public Server(Class<?> protocolClass, Object protocolImpl,
 	        Configuration conf, String bindAddress, int port, int numHandlers,
-	        int numReaders, int queueSizePerHandler, boolean verbose,
-	        SecretManager<? extends TokenIdentifier> secretManager, 
+	        int numReaders, int queueSizePerHandler,
+	        
 	        String portRangeConfig)
 	        throws IOException {
 	      super(bindAddress, port, null, numHandlers,
@@ -389,7 +379,6 @@ public class ProtobufRpcEngine implements RpcEngine {
 	        return impl;
 	      }
 
-	      @Override 
 	      /**
 	       * This is a server side method, which is invoked over RPC. On success
 	       * the return response has protobuf response payload. On failure, the
@@ -408,8 +397,8 @@ public class ProtobufRpcEngine implements RpcEngine {
 	       * it is.</li>
 	       * </ol>
 	       */
-	      public Writable call(RPC.Server server, String protocol,
-	          Writable writableRequest, long receiveTime) throws Exception {
+	      public Writable call(AbstractServer server, String protocol,
+	    	      Writable writableRequest, long receiveTime) throws Exception{
 	        RpcRequestWritable request = (RpcRequestWritable) writableRequest;
 	        HadoopRpcRequestProto rpcRequest = request.message;
 	        String methodName = rpcRequest.getMethodName();

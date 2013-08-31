@@ -2,6 +2,8 @@ package com.github.dtf.rpc;
 
 import java.io.IOException;
 
+import com.github.dtf.rpc.server.AbstractServer;
+
 
 public interface RpcInvoker {   
   /**

@@ -1,45 +1,39 @@
 package com.github.dtf.rpc;
 
+import java.io.Closeable;
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Proxy;
-
 import java.net.ConnectException;
 import java.net.InetSocketAddress;
 import java.net.NoRouteToHostException;
 import java.net.SocketTimeoutException;
-import java.io.*;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.HashMap;
 
 import javax.net.SocketFactory;
 
-import org.apache.commons.logging.*;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.hadoop.ipc.ProtocolTranslator;
+import org.apache.hadoop.security.SaslRpcServer;
 
-//import org.apache.hadoop.HadoopIllegalArgumentException;
-//import org.apache.hadoop.io.*;
-//import org.apache.hadoop.io.retry.RetryPolicy;
-//import org.apache.hadoop.ipc.Client.ConnectionId;
-//import org.apache.hadoop.ipc.protobuf.ProtocolInfoProtos.ProtocolInfoService;
-//import org.apache.hadoop.net.NetUtils;
-//import org.apache.hadoop.security.SaslRpcServer;
-//import org.apache.hadoop.security.UserGroupInformation;
-//import org.apache.hadoop.security.token.SecretManager;
-//import org.apache.hadoop.security.token.TokenIdentifier;
-//import org.apache.hadoop.conf.*;
-//import org.apache.hadoop.util.ReflectionUtils;
-//import org.apache.hadoop.util.Time;
-
+import com.github.common.http.NetUtils;
 import com.github.dtf.conf.Configuration;
 import com.github.dtf.exception.HadoopIllegalArgumentException;
 import com.github.dtf.protocol.ProtocolInfo;
+import com.github.dtf.protocol.ProtocolProxy;
 import com.github.dtf.protocol.VersionedProtocol;
+import com.github.dtf.rpc.client.ConnectionId;
 import com.github.dtf.rpc.server.Server;
+import com.github.dtf.security.UserGroupInformation;
+import com.github.dtf.transport.RetryPolicy;
 import com.github.dtf.utils.ReflectionUtils;
-import com.google.protobuf.BlockingService;
+import com.github.dtf.utils.Time;
 
 /** A simple RPC mechanism.
  *
@@ -60,19 +54,6 @@ import com.google.protobuf.BlockingService;
  * the protocol instance is transmitted.
  */
 public class RPC {
-  public enum Type {
-    RPC_BUILTIN ((short) 1),         // Used for built in calls by tests
-    RPC_WRITABLE ((short) 2),        // Use WritableRpcEngine 
-    RPC_PROTOCOL_BUFFER ((short) 3); // Use ProtobufRpcEngine
-    final static short MAX_INDEX = RPC_PROTOCOL_BUFFER.value; // used for array size
-    private static final short FIRST_INDEX = RPC_BUILTIN.value;    
-    public final short value; //TODO make it private
-
-    Type(short val) {
-      this.value = val;
-    } 
-  }
-
   
   static final Log LOG = LogFactory.getLog(RPC.class);
   

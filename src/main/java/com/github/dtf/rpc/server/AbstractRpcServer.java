@@ -5,15 +5,16 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+
 import com.github.dtf.conf.Configuration;
+import com.github.dtf.rpc.ProtobufRpcEngine;
 import com.github.dtf.rpc.RPC;
+import com.github.dtf.rpc.RpcType;
 import com.github.dtf.rpc.Writable;
-
-
 
 /** An RPC Server. */
 public abstract class AbstractRpcServer extends AbstractServer {
- boolean verbose;
+// boolean verbose;
  static String classNameBase(String className) {
     String[] names = className.split("\\.", -1);
     if (names == null || names.length == 0) {
@@ -66,11 +67,11 @@ public abstract class AbstractRpcServer extends AbstractServer {
  }
 
  ArrayList<Map<ProtoNameVer, ProtoClassProtoImpl>> protocolImplMapArray = 
-     new ArrayList<Map<ProtoNameVer, ProtoClassProtoImpl>>(RpcKind.MAX_INDEX);
+     new ArrayList<Map<ProtoNameVer, ProtoClassProtoImpl>>(RpcType.MAX_INDEX);
  
- Map<ProtoNameVer, ProtoClassProtoImpl> getProtocolImplMap(RPC.RpcKind rpcKind) {
+ Map<ProtoNameVer, ProtoClassProtoImpl> getProtocolImplMap(RpcType rpcKind) {
    if (protocolImplMapArray.size() == 0) {// initialize for all rpc kinds
-     for (int i=0; i <= RpcKind.MAX_INDEX; ++i) {
+     for (int i=0; i <= RpcType.MAX_INDEX; ++i) {
        protocolImplMapArray.add(
            new HashMap<ProtoNameVer, ProtoClassProtoImpl>(10));
      }
@@ -79,7 +80,7 @@ public abstract class AbstractRpcServer extends AbstractServer {
  }
  
  // Register  protocol and its impl for rpc calls
- protected void registerProtocolAndImpl(RPC.Type rpcKind, Class<?> protocolClass, 
+ protected void registerProtocolAndImpl(RpcType rpcKind, Class<?> protocolClass, 
      Object protocolImpl) throws IOException {
    String protocolName = RPC.getProtocolName(protocolClass);
    long version;
@@ -112,7 +113,7 @@ public abstract class AbstractRpcServer extends AbstractServer {
  
  
  @SuppressWarnings("unused") // will be useful later.
- VerProtocolImpl[] getSupportedProtocolVersions(RPC.RpcKind rpcKind,
+ VerProtocolImpl[] getSupportedProtocolVersions(RpcType rpcKind,
      String protocolName) {
    VerProtocolImpl[] resultk = 
        new  VerProtocolImpl[getProtocolImplMap(rpcKind).size()];
@@ -132,7 +133,7 @@ public abstract class AbstractRpcServer extends AbstractServer {
    return result;
  }
  
- VerProtocolImpl getHighestSupportedProtocol(RpcKind rpcKind, 
+ VerProtocolImpl getHighestSupportedProtocol(RpcType rpcKind, 
      String protocolName) {    
    Long highestVersion = 0L;
    ProtoClassProtoImpl highest = null;
@@ -159,10 +160,9 @@ public abstract class AbstractRpcServer extends AbstractServer {
                    Class<? extends Writable> paramClass, int handlerCount,
                    int numReaders, int queueSizePerHandler,
                    Configuration conf, String serverName, 
-                   SecretManager<? extends TokenIdentifier> secretManager,
                    String portRangeConfig) throws IOException {
     super(bindAddress, port, paramClass, handlerCount, numReaders, queueSizePerHandler,
-          conf, serverName, secretManager, portRangeConfig);
+          conf, serverName, portRangeConfig);
     initProtocolMetaInfo(conf);
   }
   
@@ -174,7 +174,7 @@ public abstract class AbstractRpcServer extends AbstractServer {
         new ProtocolMetaInfoServerSideTranslatorPB(this);
     BlockingService protocolInfoBlockingService = ProtocolInfoService
         .newReflectiveBlockingService(xlator);
-    addProtocol(RpcKind.RPC_PROTOCOL_BUFFER, ProtocolMetaInfoPB.class,
+    addProtocol(RpcType.RPC_PROTOCOL_BUFFER, ProtocolMetaInfoPB.class,
         protocolInfoBlockingService);
   }
   
@@ -184,13 +184,13 @@ public abstract class AbstractRpcServer extends AbstractServer {
    * @param protocolImpl - the impl of the protocol that will be called
    * @return the server (for convenience)
    */
-  public Server addProtocol(RpcKind rpcKind, Class<?> protocolClass,
+  public Server addProtocol(RpcType rpcKind, Class<?> protocolClass,
       Object protocolImpl) throws IOException {
     registerProtocolAndImpl(rpcKind, protocolClass, protocolImpl);
     return this;
   }
   
-  public Writable call(RPC.Type rpcKind, String protocol,
+  public Writable call(RpcType rpcKind, String protocol,
       Writable rpcRequest, long receiveTime) throws Exception {
     return getRpcInvoker(rpcKind).call(this, protocol, rpcRequest,
         receiveTime);

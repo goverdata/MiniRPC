@@ -1,38 +1,23 @@
 package com.github.dtf.rpc.server;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.DataInputStream;
-import java.io.DataOutput;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.BindException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
-import java.net.Socket;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
-import java.nio.channels.CancelledKeyException;
-import java.nio.channels.Channels;
-import java.nio.channels.ClosedChannelException;
 import java.nio.channels.ReadableByteChannel;
-import java.nio.channels.SelectionKey;
-import java.nio.channels.Selector;
-import java.nio.channels.ServerSocketChannel;
-import java.nio.channels.SocketChannel;
 import java.nio.channels.WritableByteChannel;
-import java.security.AccessControlException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -40,28 +25,20 @@ import java.util.concurrent.LinkedBlockingQueue;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.github.common.http.NetUtils;
 import com.github.common.string.StringUtils;
 import com.github.common.utils.WritableUtils;
 import com.github.dtf.conf.CommonConfigurationKeys;
 import com.github.dtf.conf.CommonConfigurationKeysPublic;
 import com.github.dtf.conf.Configuration;
-import com.github.dtf.exception.IpcException;
 import com.github.dtf.rpc.RPC;
-import com.github.dtf.rpc.RpcDetailedMetrics;
-import com.github.dtf.rpc.RpcMetrics;
-import com.github.dtf.rpc.RPC.VersionMismatch;
 import com.github.dtf.rpc.RpcInvoker;
 import com.github.dtf.rpc.RpcPayloadHeaderProtos.RpcKindProto;
-import com.github.dtf.rpc.RpcPayloadHeaderProtos.RpcPayloadHeaderProto;
-import com.github.dtf.rpc.RpcPayloadHeaderProtos.RpcPayloadOperationProto;
 import com.github.dtf.rpc.RpcPayloadHeaderProtos.RpcResponseHeaderProto;
 import com.github.dtf.rpc.RpcPayloadHeaderProtos.RpcStatusProto;
+import com.github.dtf.rpc.RpcType;
 import com.github.dtf.rpc.Writable;
 import com.github.dtf.rpc.client.Client;
-import com.github.dtf.security.UserGroupInformation;
 import com.github.dtf.utils.ProtoUtil;
-import com.github.dtf.utils.ReflectionUtils;
 
 /**
  * An abstract IPC service. IPC calls take a single {@link Writable} as a
@@ -74,19 +51,18 @@ public abstract class AbstractServer implements Server {
 	// private final boolean authorize;
 	// private boolean isSecurityEnabled;
 
-	static class RpcKindMapValue {
+	static class RpcTypeMapValue {
 		final Class<? extends Writable> rpcRequestWrapperClass;
 		final RpcInvoker rpcInvoker;
 
-		RpcKindMapValue(Class<? extends Writable> rpcRequestWrapperClass,
+		RpcTypeMapValue(Class<? extends Writable> rpcRequestWrapperClass,
 				RpcInvoker rpcInvoker) {
 			this.rpcInvoker = rpcInvoker;
 			this.rpcRequestWrapperClass = rpcRequestWrapperClass;
 		}
 	}
 
-	static Map<RPC.Type, RpcKindMapValue> rpcKindMap = new HashMap<RPC.Type, RpcKindMapValue>(
-			4);
+	static Map<RpcType, RpcTypeMapValue> rpcKindMap = new HashMap<RpcType, RpcTypeMapValue>(4);
 
 	/**
 	 * Register a RPC kind and the class to deserialize the rpc request.
@@ -100,10 +76,10 @@ public abstract class AbstractServer implements Server {
 	 *            - use to process the calls on SS.
 	 */
 
-	public static void registerProtocolEngine(RPC.Type rpcKind,
+	public static void registerProtocolEngine(RpcType rpcKind,
 			Class<? extends Writable> rpcRequestWrapperClass,
 			RpcInvoker rpcInvoker) {
-		RpcKindMapValue old = rpcKindMap.put(rpcKind, new RpcKindMapValue(
+		RpcTypeMapValue old = rpcKindMap.put(rpcKind, new RpcTypeMapValue(
 				rpcRequestWrapperClass, rpcInvoker));
 		if (old != null) {
 			rpcKindMap.put(rpcKind, old);
@@ -117,12 +93,12 @@ public abstract class AbstractServer implements Server {
 	public Class<? extends Writable> getRpcRequestWrapper(RpcKindProto rpcKind) {
 		if (rpcRequestClass != null)
 			return rpcRequestClass;
-		RpcKindMapValue val = rpcKindMap.get(ProtoUtil.convert(rpcKind));
+		RpcTypeMapValue val = rpcKindMap.get(ProtoUtil.convert(rpcKind));
 		return (val == null) ? null : val.rpcRequestWrapperClass;
 	}
 
-	public static RpcInvoker getRpcInvoker(RPC.Type rpcKind) {
-		RpcKindMapValue val = rpcKindMap.get(rpcKind);
+	public static RpcInvoker getRpcInvoker(RpcType rpcKind) {
+		RpcTypeMapValue val = rpcKindMap.get(rpcKind);
 		return (val == null) ? null : val.rpcInvoker;
 	}
 
@@ -200,8 +176,8 @@ public abstract class AbstractServer implements Server {
 	private int maxIdleTime; // the maximum idle time after
 								// which a client may be disconnected
 
-	protected RpcMetrics rpcMetrics;
-	protected RpcDetailedMetrics rpcDetailedMetrics;
+//	protected RpcMetrics rpcMetrics;
+//	protected RpcDetailedMetrics rpcDetailedMetrics;
 
 	private Configuration conf;
 	private String portRangeConfig = null;
@@ -257,7 +233,8 @@ public abstract class AbstractServer implements Server {
 			int backlog, Configuration conf, String rangeConf)
 			throws IOException {
 		try {
-			IntegerRanges range = null;
+			socket.bind(address, backlog);
+			/*IntegerRanges range = null;
 			if (rangeConf != null) {
 				range = conf.getRange(rangeConf, "");
 			}
@@ -279,7 +256,7 @@ public abstract class AbstractServer implements Server {
 					throw new BindException("Could not find a free port in "
 							+ range);
 				}
-			}
+			}*/
 		} catch (SocketException e) {
 			throw new IOException();
 			/*
@@ -295,14 +272,14 @@ public abstract class AbstractServer implements Server {
 	 * @return rpc metrics
 	 */
 	// @VisibleForTesting
-	public RpcMetrics getRpcMetrics() {
-		return rpcMetrics;
-	}
+//	public RpcMetrics getRpcMetrics() {
+//		return rpcMetrics;
+//	}
 
 	// @VisibleForTesting
-	public RpcDetailedMetrics getRpcDetailedMetrics() {
-		return rpcDetailedMetrics;
-	}
+//	public RpcDetailedMetrics getRpcDetailedMetrics() {
+//		return rpcDetailedMetrics;
+//	}
 
 	// @VisibleForTesting
 	Iterable<? extends Thread> getHandlers() {
@@ -337,13 +314,13 @@ public abstract class AbstractServer implements Server {
 //		 long timestamp; // time received when response is null
 //								// time served when response is not null
 //		 ByteBuffer rpcResponse; // the response for this call
-//		final RPC.Type rpcKind;
+//		final RpcType rpcKind;
 //
 //		public Call(int id, Writable param, Connection connection) {
-//			this(id, param, connection, RPC.Type.RPC_BUILTIN);
+//			this(id, param, connection, RpcType.RPC_BUILTIN);
 //		}
 //
-//		public Call(int id, Writable param, Connection connection, RPC.Type kind) {
+//		public Call(int id, Writable param, Connection connection, RpcType kind) {
 //			this.callId = id;
 //			this.rpcRequest = param;
 //			this.connection = connection;
@@ -1363,12 +1340,12 @@ public abstract class AbstractServer implements Server {
 		this.maxIdleTime = 2 * conf
 				.getInt(CommonConfigurationKeysPublic.IPC_CLIENT_CONNECTION_MAXIDLETIME_KEY,
 						CommonConfigurationKeysPublic.IPC_CLIENT_CONNECTION_MAXIDLETIME_DEFAULT);
-		this.maxConnectionsToNuke = conf.getInt(
-				CommonConfigurationKeysPublic.IPC_CLIENT_KILL_MAX_KEY,
-				CommonConfigurationKeysPublic.IPC_CLIENT_KILL_MAX_DEFAULT);
-		this.thresholdIdleConnections = conf.getInt(
-				CommonConfigurationKeysPublic.IPC_CLIENT_IDLETHRESHOLD_KEY,
-				CommonConfigurationKeysPublic.IPC_CLIENT_IDLETHRESHOLD_DEFAULT);
+//		this.maxConnectionsToNuke = conf.getInt(
+//				CommonConfigurationKeysPublic.IPC_CLIENT_KILL_MAX_KEY,
+//				CommonConfigurationKeysPublic.IPC_CLIENT_KILL_MAX_DEFAULT);
+//		this.thresholdIdleConnections = conf.getInt(
+//				CommonConfigurationKeysPublic.IPC_CLIENT_IDLETHRESHOLD_KEY,
+//				CommonConfigurationKeysPublic.IPC_CLIENT_IDLETHRESHOLD_DEFAULT);
 		// this.secretManager = (SecretManager<TokenIdentifier>) secretManager;
 		// this.authorize =
 		// conf.getBoolean(CommonConfigurationKeys.HADOOP_SECURITY_AUTHORIZATION,
@@ -1376,10 +1353,10 @@ public abstract class AbstractServer implements Server {
 		// this.isSecurityEnabled = UserGroupInformation.isSecurityEnabled();
 
 		// Start the listener here and let it bind to the port
-		listener = new Listener();
+		listener = new Listener(this, bindAddress, port, false);
 		this.port = listener.getAddress().getPort();
-		this.rpcMetrics = RpcMetrics.create(this);
-		this.rpcDetailedMetrics = RpcDetailedMetrics.create(this.port);
+//		this.rpcMetrics = RpcMetrics.create(this);
+//		this.rpcDetailedMetrics = RpcDetailedMetrics.create(this.port);
 		this.tcpNoDelay = conf.getBoolean(
 				CommonConfigurationKeysPublic.IPC_SERVER_TCPNODELAY_KEY,
 				CommonConfigurationKeysPublic.IPC_SERVER_TCPNODELAY_DEFAULT);
@@ -1557,12 +1534,12 @@ public abstract class AbstractServer implements Server {
 		listener.doStop();
 		responder.interrupt();
 		notifyAll();
-		if (this.rpcMetrics != null) {
-			this.rpcMetrics.shutdown();
-		}
-		if (this.rpcDetailedMetrics != null) {
-			this.rpcDetailedMetrics.shutdown();
-		}
+//		if (this.rpcMetrics != null) {
+//			this.rpcMetrics.shutdown();
+//		}
+//		if (this.rpcDetailedMetrics != null) {
+//			this.rpcDetailedMetrics.shutdown();
+//		}
 	}
 
 	/**
@@ -1585,7 +1562,7 @@ public abstract class AbstractServer implements Server {
 	}
 
 	/** Called for each call. */
-	public abstract Writable call(RPC.Type rpcKind, String protocol,
+	public abstract Writable call(RpcType rpcKind, String protocol,
 			Writable param, long receiveTime) throws Exception;
 
 	/**
