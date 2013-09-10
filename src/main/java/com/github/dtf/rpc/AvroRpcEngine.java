@@ -9,8 +9,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.github.dtf.conf.Configuration;
-import com.github.dtf.protocol.ProtocolProxy;
-import com.github.dtf.rpc.ProtobufRpcEngine.Server;
+import com.github.dtf.rpc.protocol.ProtocolProxy;
+import com.github.dtf.rpc.protocol.ProtobufRpcEngine.Server;
 import com.github.dtf.rpc.server.AbstractRpcServer;
 import com.github.dtf.rpc.server.AbstractServer;
 import com.github.dtf.security.UserGroupInformation;
@@ -21,7 +21,7 @@ public class AvroRpcEngine implements RpcEngine {
 
 	static {
 		// Register the rpcRequest deserializer for WritableRpcEngine
-		AbstractServer.registerProtocolEngine(RPC.Type.RPC_AVRO,
+		AbstractRpcServer.registerProtocolEngine(RpcType.RPC_AVRO,
 				RpcRequestWritable.class, new Server.ProtoBufRpcInvoker());
 	}
 

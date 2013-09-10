@@ -6,7 +6,7 @@ import java.net.InetSocketAddress;
 import javax.net.SocketFactory;
 
 import com.github.dtf.conf.Configuration;
-import com.github.dtf.protocol.ProtocolProxy;
+import com.github.dtf.rpc.protocol.ProtocolProxy;
 import com.github.dtf.rpc.server.AbstractRpcServer;
 import com.github.dtf.rpc.server.Server;
 import com.github.dtf.security.UserGroupInformation;
@@ -19,7 +19,7 @@ public interface RpcEngine {
 	   * @param <T>*/
 	  <T> ProtocolProxy<T> getProxy(Class<T> protocol,
 	                  long clientVersion, InetSocketAddress addr,
-	                  UserGroupInformation ticket, Configuration conf,
+	                  Configuration conf,
 	                  SocketFactory factory, int rpcTimeout,
 	                  RetryPolicy connectionRetryPolicy) throws IOException;
 

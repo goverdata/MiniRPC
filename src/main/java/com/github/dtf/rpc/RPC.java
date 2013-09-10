@@ -25,10 +25,12 @@ import org.apache.hadoop.security.SaslRpcServer;
 import com.github.common.http.NetUtils;
 import com.github.dtf.conf.Configuration;
 import com.github.dtf.exception.HadoopIllegalArgumentException;
+import com.github.dtf.exception.RpcIllegalArgumentException;
 import com.github.dtf.protocol.ProtocolInfo;
-import com.github.dtf.protocol.ProtocolProxy;
 import com.github.dtf.protocol.VersionedProtocol;
 import com.github.dtf.rpc.client.ConnectionId;
+import com.github.dtf.rpc.protocol.ProtobufRpcEngine;
+import com.github.dtf.rpc.protocol.ProtocolProxy;
 import com.github.dtf.rpc.server.Server;
 import com.github.dtf.security.UserGroupInformation;
 import com.github.dtf.transport.RetryPolicy;
@@ -471,9 +473,9 @@ public class RPC {
                                 SocketFactory factory,
                                 int rpcTimeout,
                                 RetryPolicy connectionRetryPolicy) throws IOException {    
-    if (UserGroupInformation.isSecurityEnabled()) {
-      SaslRpcServer.init(conf);
-    }
+//    if (UserGroupInformation.isSecurityEnabled()) {
+//      SaslRpcServer.init(conf);
+//    }
     return getProtocolEngine(protocol,conf).getProxy(protocol, clientVersion,
         addr, ticket, conf, factory, rpcTimeout, connectionRetryPolicy);
   }
@@ -576,7 +578,7 @@ public class RPC {
     // If you see this error on a mock object in a unit test you're
     // developing, make sure to use MockitoUtil.mockProtocol() to
     // create your mock.
-    throw new HadoopIllegalArgumentException(
+    throw new RpcIllegalArgumentException(
         "Cannot close proxy - is not Closeable or "
             + "does not provide closeable invocation handler "
             + proxy.getClass());

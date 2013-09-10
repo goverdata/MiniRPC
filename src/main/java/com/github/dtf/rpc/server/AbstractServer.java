@@ -51,56 +51,7 @@ public abstract class AbstractServer implements Server {
 	// private final boolean authorize;
 	// private boolean isSecurityEnabled;
 
-	static class RpcTypeMapValue {
-		final Class<? extends Writable> rpcRequestWrapperClass;
-		final RpcInvoker rpcInvoker;
-
-		RpcTypeMapValue(Class<? extends Writable> rpcRequestWrapperClass,
-				RpcInvoker rpcInvoker) {
-			this.rpcInvoker = rpcInvoker;
-			this.rpcRequestWrapperClass = rpcRequestWrapperClass;
-		}
-	}
-
-	static Map<RpcType, RpcTypeMapValue> rpcKindMap = new HashMap<RpcType, RpcTypeMapValue>(4);
-
-	/**
-	 * Register a RPC kind and the class to deserialize the rpc request.
-	 * 
-	 * Called by static initializers of rpcKind Engines
-	 * 
-	 * @param rpcKind
-	 * @param rpcRequestWrapperClass
-	 *            - this class is used to deserialze the the rpc request.
-	 * @param rpcInvoker
-	 *            - use to process the calls on SS.
-	 */
-
-	public static void registerProtocolEngine(RpcType rpcKind,
-			Class<? extends Writable> rpcRequestWrapperClass,
-			RpcInvoker rpcInvoker) {
-		RpcTypeMapValue old = rpcKindMap.put(rpcKind, new RpcTypeMapValue(
-				rpcRequestWrapperClass, rpcInvoker));
-		if (old != null) {
-			rpcKindMap.put(rpcKind, old);
-			throw new IllegalArgumentException("ReRegistration of rpcKind: "
-					+ rpcKind);
-		}
-		LOG.debug("rpcKind=" + rpcKind + ", rpcRequestWrapperClass="
-				+ rpcRequestWrapperClass + ", rpcInvoker=" + rpcInvoker);
-	}
-
-	public Class<? extends Writable> getRpcRequestWrapper(RpcKindProto rpcKind) {
-		if (rpcRequestClass != null)
-			return rpcRequestClass;
-		RpcTypeMapValue val = rpcKindMap.get(ProtoUtil.convert(rpcKind));
-		return (val == null) ? null : val.rpcRequestWrapperClass;
-	}
-
-	public static RpcInvoker getRpcInvoker(RpcType rpcKind) {
-		RpcTypeMapValue val = rpcKindMap.get(rpcKind);
-		return (val == null) ? null : val.rpcInvoker;
-	}
+	
 
 	public static final Log LOG = LogFactory.getLog(Server.class);
 	public static final Log AUDITLOG = LogFactory.getLog("SecurityLogger."
@@ -170,9 +121,7 @@ public abstract class AbstractServer implements Server {
 	private int port; // port we listen on
 	private int handlerCount; // number of handler threads
 	private int readThreads; // number of read threads
-	private Class<? extends Writable> rpcRequestClass; // class used for
-														// deserializing the rpc
-														// request
+	
 	private int maxIdleTime; // the maximum idle time after
 								// which a client may be disconnected
 
@@ -1315,7 +1264,7 @@ public abstract class AbstractServer implements Server {
 		this.conf = conf;
 		this.portRangeConfig = portRangeConfig;
 		this.port = port;
-		this.rpcRequestClass = rpcRequestClass;
+
 		this.handlerCount = handlerCount;
 		this.socketSendBufferSize = 0;
 		if (queueSizePerHandler != -1) {
@@ -1735,5 +1684,36 @@ public abstract class AbstractServer implements Server {
 
 		int nBytes = initialRemaining - buf.remaining();
 		return (nBytes > 0) ? nBytes : ret;
+	}
+	
+	
+	
+	Class<? extends Writable> rpcRequestClass; // class used for
+	// deserializing the rpc
+	// request
+	static class RpcTypeMapValue {
+		final Class<? extends Writable> rpcRequestWrapperClass;
+		final RpcInvoker rpcInvoker;
+
+		RpcTypeMapValue(Class<? extends Writable> rpcRequestWrapperClass,
+				RpcInvoker rpcInvoker) {
+			this.rpcInvoker = rpcInvoker;
+			this.rpcRequestWrapperClass = rpcRequestWrapperClass;
+		}
+	}
+
+	static Map<RpcType, RpcTypeMapValue> rpcKindMap = new HashMap<RpcType, RpcTypeMapValue>(4);
+
+	
+	public Class<? extends Writable> getRpcRequestWrapper(RpcKindProto rpcKind) {
+		if (rpcRequestClass != null)
+			return rpcRequestClass;
+		RpcTypeMapValue val = rpcKindMap.get(ProtoUtil.convert(rpcKind));
+		return (val == null) ? null : val.rpcRequestWrapperClass;
+	}
+	
+	public static RpcInvoker getRpcInvoker(RpcType rpcKind) {
+		RpcTypeMapValue val = rpcKindMap.get(rpcKind);
+		return (val == null) ? null : val.rpcInvoker;
 	}
 }

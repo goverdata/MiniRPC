@@ -1,28 +1,10 @@
 package com.github.dtf.rpc.client;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.FilterInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InterruptedIOException;
-import java.io.OutputStream;
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.net.Socket;
-import java.net.SocketTimeoutException;
-import java.net.UnknownHostException;
-import java.security.PrivilegedExceptionAction;
 import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.Map.Entry;
-import java.util.Random;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicLong;
 
 import javax.net.SocketFactory;
 
@@ -31,8 +13,9 @@ import org.apache.commons.logging.LogFactory;
 
 import com.github.common.http.NetUtils;
 import com.github.dtf.conf.Configuration;
-import com.github.dtf.rpc.RPC;
+import com.github.dtf.rpc.RpcType;
 import com.github.dtf.rpc.Writable;
+import com.github.dtf.rpc.server.Server;
 import com.github.dtf.security.UserGroupInformation;
 
 /** A client for an IPC service.  IPC calls take a single {@link Writable} as a
@@ -178,15 +161,15 @@ public class Client {
   }
 
   /**
-   * Same as {@link #call(RPC.Type, Writable, ConnectionId)}
+   * Same as {@link #call(RpcType, Writable, ConnectionId)}
    *  for RPC_BUILTIN
    */
 //  public Writable call(Writable param, InetSocketAddress address)
 //  throws InterruptedException, IOException {
-//    return call(RPC.Type.RPC_BUILTIN, param, address);
+//    return call(RpcType.RPC_BUILTIN, param, address);
 //  }
   /**
-   * Same as {@link #call(RPC.Type, Writable, InetSocketAddress, 
+   * Same as {@link #call(RpcType, Writable, InetSocketAddress, 
    * Class, UserGroupInformation, int, Configuration)}
    * except that rpcKind is writable.
    */
@@ -197,7 +180,7 @@ public class Client {
 //        ConnectionId remoteId = ConnectionId.getConnectionId(addr, protocol,
 //        ticket, rpcTimeout, conf);
       ConnectionId remoteId = new ConnectionId(addr, protocol);
-    return call(RPC.Type.RPC_BUILTIN, param, remoteId);
+    return call(RpcType.RPC_BUILTIN, param, remoteId);
   }
   
   /**
@@ -208,7 +191,7 @@ public class Client {
    * value. Throws exceptions if there are network problems or if the remote
    * code threw an exception.
    */
-  public Writable call(RPC.Type rpcKind, Writable param, InetSocketAddress addr, 
+  public Writable call(RpcType rpcKind, Writable param, InetSocketAddress addr, 
                        Class<?> protocol, UserGroupInformation ticket,
                        int rpcTimeout, Configuration conf)  
                        throws InterruptedException, IOException {
@@ -218,12 +201,12 @@ public class Client {
   }
   
   /**
-   * Same as {link {@link #call(RPC.Type, Writable, ConnectionId)}
+   * Same as {link {@link #call(RpcType, Writable, ConnectionId)}
    * except the rpcKind is RPC_BUILTIN
    */
   public Writable call(Writable param, ConnectionId remoteId)  
       throws InterruptedException, IOException {
-     return call(RPC.Type.RPC_BUILTIN, param, remoteId);
+     return call(RpcType.RPC_BUILTIN, param, remoteId);
   }
   
   /** 
@@ -237,7 +220,7 @@ public class Client {
    * Throws exceptions if there are network problems or if the remote code 
    * threw an exception.
    */
-  public Writable call(RPC.Type rpcKind, Writable rpcRequest,
+  public Writable call(RpcType rpcKind, Writable rpcRequest,
       ConnectionId remoteId) throws InterruptedException, IOException {
     Call call = new Call(rpcKind, rpcRequest, this);
     Connection connection = getConnection(remoteId, call);

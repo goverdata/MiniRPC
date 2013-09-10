@@ -45,10 +45,10 @@ import org.apache.commons.logging.LogFactory;
 import com.github.dtf.conf.Configurable;
 import com.github.dtf.conf.Configuration;
 import com.github.dtf.io.ObjectWritable;
-import com.github.dtf.protocol.ProtocolProxy;
 import com.github.dtf.rpc.client.Client;
 import com.github.dtf.rpc.client.ClientCache;
 import com.github.dtf.rpc.client.ConnectionId;
+import com.github.dtf.rpc.protocol.ProtocolProxy;
 import com.github.dtf.rpc.server.AbstractRpcServer;
 import com.github.dtf.security.UserGroupInformation;
 import com.github.dtf.transport.RetryPolicy;
@@ -84,7 +84,7 @@ public class WritableRpcEngine implements RpcEngine {
 	   * Register the rpcRequest deserializer for WritableRpcEngine
 	   */
 	  private static synchronized void initialize() {
-		  com.github.dtf.rpc.server.AbstractServer.registerProtocolEngine(RPC.Type.RPC_WRITABLE,
+		  AbstractRpcServer.registerProtocolEngine(RpcType.RPC_WRITABLE,
 	        Invocation.class, new Server.WritableRpcInvoker());
 	    isInitialized = true;
 	  }
@@ -235,7 +235,7 @@ public class WritableRpcEngine implements RpcEngine {
 
 	      //ObjectWritable value = (ObjectWritable)
 	      ObjectWritable value = null;
-	      client.call(RPC.Type.RPC_WRITABLE, new Invocation(method, args), remoteId);
+	      client.call(RpcType.RPC_WRITABLE, new Invocation(method, args), remoteId);
 	      if (LOG.isDebugEnabled()) {
 	        long callTime = System.currentTimeMillis() - startTime;
 	        LOG.debug("Call: " + method.getName() + " " + callTime);
@@ -356,7 +356,7 @@ public class WritableRpcEngine implements RpcEngine {
 	              protocolImpl.getClass());
 	        }
 	        // register protocol class and its super interfaces
-	        registerProtocolAndImpl(RPC.Type.RPC_WRITABLE, protocolClass, protocolImpl);
+	        registerProtocolAndImpl(RpcType.RPC_WRITABLE, protocolClass, protocolImpl);
 	        protocols = RPC.getProtocolInterfaces(protocolClass);
 	      }
 	      for (Class<?> p : protocols) {

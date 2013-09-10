@@ -62,8 +62,7 @@ public class Listener extends Thread {
 
 		// Bind the server socket to the local host and port
 		NetUtils.bind(acceptChannel.socket(), address, backlogLength);
-		port = acceptChannel.socket().getLocalPort(); // Could be an ephemeral
-														// port
+		port = acceptChannel.socket().getLocalPort(); // Could be an ephemeral port
 		// create a selector;
 		selector = Selector.open();
 		readers = new Reader[readThreads];

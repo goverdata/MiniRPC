@@ -37,7 +37,7 @@ import com.github.dtf.utils.ReflectionUtils;
 public class Connection {
 	public static final Log LOG = LogFactory.getLog(Connection.class);
 	private boolean connectionHeaderRead = false; // connection header is read?
-	private boolean connectionContextRead = false; // if connection context that
+//	private boolean connectionContextRead = false; // if connection context that
 	// follows connection header is read
 	/**
 	 * If the user accidentally sends an HTTP GET to an IPC port, we detect this
@@ -426,16 +426,16 @@ public class Connection {
 					skipInitialSaslHandshake = false;
 					continue;
 				}
-				boolean isHeaderRead = connectionContextRead;
+//				boolean isHeaderRead = connectionContextRead;
 				// if (useSasl) {
 				// saslReadAndProcess(data.array());
 				// } else {
 				processOneRpc(data.array());
 				// }
 				data = null;
-				if (!isHeaderRead) {
-					continue;
-				}
+//				if (!isHeaderRead) {
+//					continue;
+//				}
 			}
 			return count;
 		}
@@ -496,11 +496,11 @@ public class Connection {
 	}
 
 	/** Reads the connection context following the connection header */
-	private void processConnectionContext(byte[] buf) throws IOException {
-		DataInputStream in = new DataInputStream(new ByteArrayInputStream(buf));
-		connectionContext = IpcConnectionContextProto.parseFrom(in);
-		protocolName = connectionContext.hasProtocol() ? connectionContext
-				.getProtocol() : null;
+//	private void processConnectionContext(byte[] buf) throws IOException {
+//		DataInputStream in = new DataInputStream(new ByteArrayInputStream(buf));
+//		connectionContext = IpcConnectionContextProto.parseFrom(in);
+//		protocolName = connectionContext.hasProtocol() ? connectionContext
+//				.getProtocol() : null;
 
 		// UserGroupInformation protocolUser =
 		// ProtoUtil.getUgi(connectionContext);
@@ -534,7 +534,7 @@ public class Connection {
 		// }
 		// }
 		// }
-	}
+//	}
 
 	private void processUnwrappedData(byte[] inBuf) throws IOException,
 			InterruptedException {
@@ -577,17 +577,17 @@ public class Connection {
 
 	private void processOneRpc(byte[] buf) throws IOException,
 			InterruptedException {
-		if (connectionContextRead) {
+//		if (connectionContextRead) {
 			processData(buf);
-		} else {
-			processConnectionContext(buf);
-			connectionContextRead = true;
+//		} else {
+//			processConnectionContext(buf);
+//			connectionContextRead = true;
 			// if (!authorizeConnection()) {
 			// throw new AccessControlException("Connection from " + this
 			// + " for protocol " + connectionContext.getProtocol()
 			// + " is unauthorized for user " + user);
 			// }
-		}
+//		}
 	}
 
 	private void processData(byte[] buf) throws IOException,
@@ -649,10 +649,10 @@ public class Connection {
 			return;
 		}
 
-//		Call call = new Call(header.getCallId(), rpcRequest, this,
-//				ProtoUtil.convert(header.getRpcKind()));
+		Call call = new Call(header.getCallId(), rpcRequest, this,
+				ProtoUtil.convert(header.getRpcKind()));
 		//FIXME Just for test
-		Call call = new Call(header.getCallId(), rpcRequest, this,RpcType.RPC_WRITABLE);
+//		Call call = new Call(header.getCallId(), rpcRequest, this,RpcType.RPC_WRITABLE);
 		server.getCallQueue().put(call); // queue the call; maybe blocked here
 		incRpcCount(); // Increment the rpc count
 	}

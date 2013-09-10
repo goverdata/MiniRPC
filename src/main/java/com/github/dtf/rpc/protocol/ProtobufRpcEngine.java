@@ -1,4 +1,5 @@
-package com.github.dtf.rpc;
+package com.github.dtf.rpc.protocol;
+
 
 
 import java.io.DataInput;
@@ -20,17 +21,19 @@ import org.apache.hadoop.io.DataOutputOutputStream;
 import org.apache.hadoop.ipc.ProtocolMetaInfoPB;
 import org.apache.hadoop.ipc.RpcServerException;
 import org.apache.hadoop.ipc.protobuf.HadoopRpcProtos.HadoopRpcRequestProto;
-import org.apache.hadoop.security.token.SecretManager;
-import org.apache.hadoop.security.token.TokenIdentifier;
 
 import com.github.dtf.conf.Configuration;
-import com.github.dtf.protocol.ProtocolProxy;
+import com.github.dtf.rpc.RPC;
+import com.github.dtf.rpc.RpcEngine;
+import com.github.dtf.rpc.RpcInvocationHandler;
+import com.github.dtf.rpc.RpcInvoker;
+import com.github.dtf.rpc.RpcType;
+import com.github.dtf.rpc.Writable;
 import com.github.dtf.rpc.client.Client;
 import com.github.dtf.rpc.client.ClientCache;
 import com.github.dtf.rpc.client.ConnectionId;
-import com.github.dtf.rpc.server.AbstractServer;
 import com.github.dtf.rpc.server.AbstractRpcServer;
-import com.github.dtf.security.UserGroupInformation;
+import com.github.dtf.rpc.server.AbstractServer;
 import com.github.dtf.transport.RetryPolicy;
 import com.github.dtf.utils.ProtoUtil;
 import com.github.dtf.utils.Time;
@@ -46,27 +49,26 @@ public class ProtobufRpcEngine implements RpcEngine {
 	  
 	  static { 
 		// Register the rpcRequest deserializer for WritableRpcEngine 
-	    AbstractServer.registerProtocolEngine(
-	        RPC.Type.RPC_PROTOCOL_BUFFER, RpcRequestWritable.class,
+	    AbstractRpcServer.registerProtocolEngine(
+	        RpcType.RPC_PROTOCOL_BUFFER, RpcRequestWritable.class,
 	        new Server.ProtoBufRpcInvoker());
 	  }
 
 	  private static final ClientCache CLIENTS = new ClientCache();
 
 	  public <T> ProtocolProxy<T> getProxy(Class<T> protocol, long clientVersion,
-	      InetSocketAddress addr, UserGroupInformation ticket, Configuration conf,
+	      InetSocketAddress addr,  Configuration conf,
 	      SocketFactory factory, int rpcTimeout) throws IOException {
-	    return getProxy(protocol, clientVersion, addr, ticket, conf, factory,
+	    return getProxy(protocol, clientVersion, addr, conf, factory,
 	        rpcTimeout, null);
 	  }
 
 	  @SuppressWarnings("unchecked")
 	  public <T> ProtocolProxy<T> getProxy(Class<T> protocol, long clientVersion,
-				InetSocketAddress addr, UserGroupInformation ticket,
-				Configuration conf, SocketFactory factory, int rpcTimeout,
+				InetSocketAddress addr, Configuration conf, SocketFactory factory, int rpcTimeout,
 				RetryPolicy connectionRetryPolicy) throws IOException {
 
-	    final Invoker invoker = new Invoker(protocol, addr, ticket, conf, factory,
+	    final Invoker invoker = new Invoker(protocol, addr, conf, factory,
 	        rpcTimeout, connectionRetryPolicy);
 	    return new ProtocolProxy<T>(protocol, (T) Proxy.newProxyInstance(
 	        protocol.getClassLoader(), new Class[]{protocol}, invoker), false);
@@ -92,10 +94,10 @@ public class ProtobufRpcEngine implements RpcEngine {
 	    private final String protocolName;
 
 	    private Invoker(Class<?> protocol, InetSocketAddress addr,
-	        UserGroupInformation ticket, Configuration conf, SocketFactory factory,
+	         Configuration conf, SocketFactory factory,
 	        int rpcTimeout, RetryPolicy connectionRetryPolicy) throws IOException {
 	      this(protocol, ConnectionId.getConnectionId(
-	          addr, protocol, ticket, rpcTimeout, connectionRetryPolicy, conf),
+	          addr, protocol, rpcTimeout,  conf),
 	          conf, factory);
 	    }
 	    
@@ -181,7 +183,7 @@ public class ProtobufRpcEngine implements RpcEngine {
 	            " {" + TextFormat.shortDebugString((Message) args[1]) + "}");
 	      }
 	      try {
-	        val = (RpcResponseWritable) client.call(RPC.RpcKind.RPC_PROTOCOL_BUFFER,
+	        val = (RpcResponseWritable) client.call(RpcType.RPC_PROTOCOL_BUFFER,
 	            new RpcRequestWritable(rpcRequest), remoteId);
 
 	      } catch (Throwable e) {
@@ -242,7 +244,7 @@ public class ProtobufRpcEngine implements RpcEngine {
 	      return prototype;
 	    }
 
-	    @Override 
+	     
 	    //RpcInvocationHandler
 	    public ConnectionId getConnectionId() {
 	      return remoteId;
@@ -350,9 +352,9 @@ public class ProtobufRpcEngine implements RpcEngine {
 	        throws IOException {
 	      super(bindAddress, port, null, numHandlers,
 	          numReaders, queueSizePerHandler, conf, classNameBase(protocolImpl
-	              .getClass().getName()), secretManager, portRangeConfig);
-	      this.verbose = verbose;  
-	      registerProtocolAndImpl(RPC.RpcKind.RPC_PROTOCOL_BUFFER, protocolClass,
+	              .getClass().getName()),  portRangeConfig);
+//	      this.verbose = verbose;  
+	      registerProtocolAndImpl(RpcType.RPC_PROTOCOL_BUFFER, protocolClass,
 	          protocolImpl);
 	    }
 	    
@@ -360,14 +362,14 @@ public class ProtobufRpcEngine implements RpcEngine {
 	     * Protobuf invoker for {@link RpcInvoker}
 	     */
 	    static class ProtoBufRpcInvoker implements RpcInvoker {
-	      private static ProtoClassProtoImpl getProtocolImpl(RPC.Server server,
+	      private static ProtoClassProtoImpl getProtocolImpl(AbstractServer server,
 	          String protoName, long version) throws IOException {
 	        ProtoNameVer pv = new ProtoNameVer(protoName, version);
 	        ProtoClassProtoImpl impl = 
-	            server.getProtocolImplMap(RPC.RpcKind.RPC_PROTOCOL_BUFFER).get(pv);
+	            server.getProtocolImplMap(RpcType.RPC_PROTOCOL_BUFFER).get(pv);
 	        if (impl == null) { // no match for Protocol AND Version
 	          VerProtocolImpl highest = 
-	              server.getHighestSupportedProtocol(RPC.RpcKind.RPC_PROTOCOL_BUFFER, 
+	              server.getHighestSupportedProtocol(RpcType.RPC_PROTOCOL_BUFFER, 
 	                  protoName);
 	          if (highest == null) {
 	            throw new IOException("Unknown protocol: " + protoName);
@@ -404,8 +406,8 @@ public class ProtobufRpcEngine implements RpcEngine {
 	        String methodName = rpcRequest.getMethodName();
 	        String protoName = rpcRequest.getDeclaringClassProtocolName();
 	        long clientVersion = rpcRequest.getClientProtocolVersion();
-	        if (server.verbose)
-	          LOG.info("Call: protocol=" + protocol + ", method=" + methodName);
+//	        if (server.verbose)
+//	          LOG.info("Call: protocol=" + protocol + ", method=" + methodName);
 	        
 	        ProtoClassProtoImpl protocolImpl = getProtocolImpl(server, protoName,
 	            clientVersion);
@@ -432,10 +434,10 @@ public class ProtobufRpcEngine implements RpcEngine {
 	            LOG.info("Served: " + methodName + " queueTime= " + qTime +
 	                      " procesingTime= " + processingTime);
 	          }
-	          server.rpcMetrics.addRpcQueueTime(qTime);
-	          server.rpcMetrics.addRpcProcessingTime(processingTime);
-	          server.rpcDetailedMetrics.addProcessingTime(methodName,
-	              processingTime);
+//	          server.rpcMetrics.addRpcQueueTime(qTime);
+//	          server.rpcMetrics.addRpcProcessingTime(processingTime);
+//	          server.rpcDetailedMetrics.addProcessingTime(methodName,
+//	              processingTime);
 	        } catch (ServiceException e) {
 	          throw (Exception) e.getCause();
 	        } catch (Exception e) {

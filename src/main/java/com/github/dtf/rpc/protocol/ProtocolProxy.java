@@ -1,10 +1,11 @@
-package com.github.dtf.protocol;
+package com.github.dtf.rpc.protocol;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.HashSet;
 
+import com.github.dtf.protocol.VersionedProtocol;
 import com.github.dtf.rpc.RPC;
 
 

@@ -3,6 +3,7 @@ package com.github.dtf.rpc.client;
 import java.io.IOException;
 
 import com.github.dtf.rpc.RPC;
+import com.github.dtf.rpc.RpcType;
 import com.github.dtf.rpc.Writable;
 
 
@@ -14,10 +15,10 @@ public class Call {
   final Writable rpcRequest;  // the serialized rpc request - RpcPayload
   Writable rpcResponse;       // null if rpc has error
   IOException error;          // exception, null if success
-  final RPC.Type rpcKind;      // Rpc EngineKind
+  final RpcType rpcKind;      // Rpc EngineKind
   boolean done;               // true when call is done
 
-  protected Call(RPC.Type rpcKind, Writable param, Client client) {
+  protected Call(RpcType rpcKind, Writable param, Client client) {
     this.rpcKind = rpcKind;
     this.rpcRequest = param;
     synchronized (client) {

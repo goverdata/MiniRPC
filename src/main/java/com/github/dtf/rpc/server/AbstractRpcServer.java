@@ -7,13 +7,47 @@ import java.util.Map;
 
 
 import com.github.dtf.conf.Configuration;
-import com.github.dtf.rpc.ProtobufRpcEngine;
 import com.github.dtf.rpc.RPC;
+import com.github.dtf.rpc.RpcInvoker;
 import com.github.dtf.rpc.RpcType;
 import com.github.dtf.rpc.Writable;
+import com.github.dtf.rpc.RpcPayloadHeaderProtos.RpcKindProto;
+import com.github.dtf.rpc.protocol.ProtobufRpcEngine;
+import com.github.dtf.utils.ProtoUtil;
 
 /** An RPC Server. */
 public abstract class AbstractRpcServer extends AbstractServer {
+	
+	/**
+	 * Register a RPC kind and the class to deserialize the rpc request.
+	 * 
+	 * Called by static initializers of rpcKind Engines
+	 * 
+	 * @param rpcKind
+	 * @param rpcRequestWrapperClass
+	 *            - this class is used to deserialze the the rpc request.
+	 * @param rpcInvoker
+	 *            - use to process the calls on SS.
+	 */
+
+	public static void registerProtocolEngine(RpcType rpcKind,
+			Class<? extends Writable> rpcRequestWrapperClass,
+			RpcInvoker rpcInvoker) {
+		RpcTypeMapValue old = rpcKindMap.put(rpcKind, new RpcTypeMapValue(
+				rpcRequestWrapperClass, rpcInvoker));
+		if (old != null) {
+			rpcKindMap.put(rpcKind, old);
+			throw new IllegalArgumentException("ReRegistration of rpcKind: "
+					+ rpcKind);
+		}
+		LOG.debug("rpcKind=" + rpcKind + ", rpcRequestWrapperClass="
+				+ rpcRequestWrapperClass + ", rpcInvoker=" + rpcInvoker);
+	}
+
+
+
+	
+	
 // boolean verbose;
  static String classNameBase(String className) {
     String[] names = className.split("\\.", -1);
@@ -57,7 +91,7 @@ public abstract class AbstractRpcServer extends AbstractServer {
  /**
   * The value in map
   */
- static class ProtoClassProtoImpl {
+ public static class ProtoClassProtoImpl {
    final Class<?> protocolClass;
    final Object protocolImpl; 
    ProtoClassProtoImpl(Class<?> protocolClass, Object protocolImpl) {
@@ -102,7 +136,7 @@ public abstract class AbstractRpcServer extends AbstractServer {
        " protocolClass=" + protocolClass.getName());
  }
  
- static class VerProtocolImpl {
+ public static class VerProtocolImpl {
    final long version;
    final ProtoClassProtoImpl protocolTarget;
    VerProtocolImpl(long ver, ProtoClassProtoImpl protocolTarget) {
@@ -155,8 +189,19 @@ public abstract class AbstractRpcServer extends AbstractServer {
    }
    return new VerProtocolImpl(highestVersion,  highest);   
  }
+ 
+ public AbstractRpcServer(String bindAddress, int port, 
+		 Class<? extends Writable> paramClass, int handlerCount,
+		 int numReaders, int queueSizePerHandler,
+		 Configuration conf, String serverName, 
+		 String portRangeConfig, Class rpcRequestClass) throws IOException {
+	 super(bindAddress, port, paramClass, handlerCount, numReaders, queueSizePerHandler,
+	          conf, serverName, portRangeConfig);
+	 initProtocolMetaInfo(conf);
+	 this.rpcRequestClass = rpcRequestClass;
+ }
 
-  protected AbstractRpcServer(String bindAddress, int port, 
+  public AbstractRpcServer(String bindAddress, int port, 
                    Class<? extends Writable> paramClass, int handlerCount,
                    int numReaders, int queueSizePerHandler,
                    Configuration conf, String serverName, 

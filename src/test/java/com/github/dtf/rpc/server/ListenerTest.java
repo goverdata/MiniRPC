@@ -21,7 +21,8 @@ public class ListenerTest {
 	@Test
 	public void test() throws IOException {
 		when(server.isRunning()).thenReturn(true);
-		InetAddress addr = InetAddress.getByName("localhost");
+		//InetAddress addr = InetAddress.getByName("localhost");
+		String addr = "localhost";
 		Listener lis = new Listener(server, addr, 2233, true);
 		lis.start();
 		try {
