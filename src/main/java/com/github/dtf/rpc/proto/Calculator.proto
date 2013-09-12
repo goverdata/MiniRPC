@@ -3,10 +3,10 @@ option java_outer_classname = "Calculator";
 option java_generic_services = true;
 option java_generate_equals_and_hash = true;  
   
-import "CalculatorMsg.proto";
+import "main/java/com/github/dtf/rpc/proto/CalculatorMsg.proto";
 
 service CalculatorService {
-rpc add(RequestProto) returns (ResponseProto);
-rpc minus(RequestProto) returns (ResponseProto);
+	rpc add(RequestProto) returns (ResponseProto);
+	rpc minus(RequestProto) returns (ResponseProto);
 }
 

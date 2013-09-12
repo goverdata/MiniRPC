@@ -1,6 +1,6 @@
 option java_package = "com.github.dtf.rpc.proto";  
 option java_outer_classname = "CalculatorMsg";  
-option  java_generic_services = true;  
+option java_generic_services = true;
 option java_generate_equals_and_hash = true;  
   
 message RequestProto {  
@@ -8,7 +8,7 @@ message RequestProto {
    required int32 num1 = 2;  
    required int32 num2 = 3;  
 }  
-  
+
 message ResponseProto {  
    required int32 result = 1;  
 }  
