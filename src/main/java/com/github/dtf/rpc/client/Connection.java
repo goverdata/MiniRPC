@@ -31,6 +31,7 @@ import com.github.common.utils.IOUtils;
 import com.github.common.utils.WritableUtils;
 import com.github.dtf.conf.Configuration;
 import com.github.dtf.io.DataOutputBuffer;
+import com.github.dtf.io.RetryPolicy;
 import com.github.dtf.rpc.RpcPayloadHeaderProtos.RpcPayloadHeaderProto;
 import com.github.dtf.rpc.RpcPayloadHeaderProtos.RpcPayloadOperationProto;
 import com.github.dtf.rpc.RpcPayloadHeaderProtos.RpcResponseHeaderProto;
@@ -38,7 +39,6 @@ import com.github.dtf.rpc.RpcPayloadHeaderProtos.RpcStatusProto;
 import com.github.dtf.rpc.Writable;
 import com.github.dtf.rpc.server.Server;
 import com.github.dtf.security.UserGroupInformation;
-import com.github.dtf.transport.RetryPolicy;
 import com.github.dtf.utils.ProtoUtil;
 import com.github.dtf.utils.ReflectionUtils;
 

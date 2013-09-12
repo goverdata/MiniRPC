@@ -6,8 +6,8 @@ import java.net.InetSocketAddress;
 import com.github.dtf.conf.CommonConfigurationKeys;
 import com.github.dtf.conf.CommonConfigurationKeysPublic;
 import com.github.dtf.conf.Configuration;
+import com.github.dtf.io.RetryPolicy;
 import com.github.dtf.security.UserGroupInformation;
-import com.github.dtf.transport.RetryPolicy;
 
 //@InterfaceAudience.LimitedPrivate({"HDFS", "MapReduce"})
 //@InterfaceStability.Evolving

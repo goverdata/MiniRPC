@@ -6,13 +6,13 @@ import java.net.InetSocketAddress;
 import javax.net.SocketFactory;
 
 import com.github.dtf.conf.Configuration;
+import com.github.dtf.io.RetryPolicy;
 import com.github.dtf.protocol.TaskUmbilicalProtocol;
 import com.github.dtf.protocol.Test1;
 import com.github.dtf.rpc.WritableRpcEngine;
 import com.github.dtf.rpc.protocol.ProtobufRpcEngine;
 import com.github.dtf.rpc.protocol.ProtocolProxy;
 import com.github.dtf.security.UserGroupInformation;
-import com.github.dtf.transport.RetryPolicy;
 
 public class MockClient {
 	
