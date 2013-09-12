@@ -13,9 +13,7 @@ public class CalculatorPBServiceImpl implements CalculatorPB {
         this.real = impl;  
     }  
       
-    @Override  
     public ResponseProto add(RpcController controller, RequestProto request) throws ServiceException {  
-        // TODO Auto-generated method stub  
         ResponseProto proto = ResponseProto.getDefaultInstance();  
         ResponseProto.Builder build = ResponseProto.newBuilder();  
         int add1 = request.getNum1();  
@@ -27,9 +25,7 @@ public class CalculatorPBServiceImpl implements CalculatorPB {
         return result;  
     }  
   
-    @Override  
     public ResponseProto minus(RpcController controller, RequestProto request) throws ServiceException { 
-        // TODO Auto-generated method stub  
         ResponseProto proto = ResponseProto.getDefaultInstance();  
         ResponseProto.Builder build = ResponseProto.newBuilder();  
         int add1 = request.getNum1();  

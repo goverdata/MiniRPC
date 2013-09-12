@@ -13,7 +13,6 @@ import com.github.dtf.rpc.protocol.Calculator;
 public class TestCalculator implements Calculator {  
 	  
     public int doTest(String op, int a, int b){  
-        // TODO Auto-generated method stub  
         Socket s = null;  
         DataOutputStream out = null;  
         DataInputStream in = null;  
@@ -59,23 +58,19 @@ public class TestCalculator implements Calculator {
         }  
         return ret;  
     }  
-    @Override  
+    
     public int add(int a, int b) {  
-        // TODO Auto-generated method stub  
         return doTest("add", a, b);  
     }  
-  
-    @Override  
+
     public int minus(int a, int b) {  
-        // TODO Auto-generated method stub  
         return doTest("minus", a, b);  
     }  
   
     /** 
      * @param args 
      */  
-    public static void main(String[] args) {  
-        // TODO Auto-generated method stub  
+    public static void main(String[] args) {
         TestCalculator tc = new TestCalculator();  
         int testCount = 5;  
         Random rand = new Random();  

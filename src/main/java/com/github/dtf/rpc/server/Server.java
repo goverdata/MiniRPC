@@ -4,10 +4,10 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;  
 import java.io.IOException;  
 import java.net.*;  
+
+import com.github.dtf.rpc.proto.CalculatorMsg.RequestProto;
 import com.google.protobuf.*;  
-import com.google.protobuf.Descriptors.MethodDescriptor;  
-import com.github.dtf.rpc.protocol.CalculatorMsg.RequestProto;  
-import com.github.dtf.rpc.protocol.CalculatorMsg.ResponseProto;  
+import com.google.protobuf.Descriptors.MethodDescriptor;
   
 public class Server extends Thread {  
    private Class<?> protocol;  
@@ -29,7 +29,7 @@ public class Server extends Thread {
            ss = new ServerSocket(port);  
        }catch(IOException e){  
        }      
-       int testCount = 10; //����10�μ������˳�  
+       int testCount = 10; //
   
        while(testCount-- > 0){  
           try {  
