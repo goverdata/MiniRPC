@@ -9,4 +9,3 @@ service CalculatorService {
 	rpc add(RequestProto) returns (ResponseProto);
 	rpc minus(RequestProto) returns (ResponseProto);
 }
-
