@@ -26,14 +26,9 @@ import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
 
-import org.apache.mina.api.IoService;
-import org.apache.mina.service.idlechecker.IdleChecker;
-import org.apache.mina.session.WriteRequest;
-import org.apache.mina.transport.ConnectFuture;
-import org.apache.mina.transport.tcp.ProxyTcpSessionConfig;
-import org.apache.mina.transport.tcp.TcpSessionConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 
 /**
  * A NIO based TCP session, should be used by {@link NioTcpServer} and {@link NioTcpClient}. A TCP session is a
@@ -42,7 +37,7 @@ import org.slf4j.LoggerFactory;
  * @author <a href="http://mina.apache.org">Apache MINA Project</a>
  * 
  */
-public class NioTcpSession extends AbstractNioSession implements SelectorListener {
+public class NioTcpSession implements SelectorListener {
 
     private static final Logger LOG = LoggerFactory.getLogger(NioTcpSession.class);
 
@@ -50,10 +45,6 @@ public class NioTcpSession extends AbstractNioSession implements SelectorListene
     private final SelectorLoop selectorLoop;
 
     /** the socket configuration */
-    private final TcpSessionConfig configuration;
-
-    /** the future representing this session connection operation (client only) */
-    private ConnectFuture connectFuture;
 
     /** The associated selectionKey */
     private SelectionKey selectionKey;
@@ -64,17 +55,14 @@ public class NioTcpSession extends AbstractNioSession implements SelectorListene
     /** The size of the buffer configured in the socket to send data */
     private int sendBufferSize;
 
-    /* No qualifier */NioTcpSession(final IoService service, final SocketChannel channel,
-            final SelectorLoop selectorLoop, final IdleChecker idleChecker) {
-        super(service, channel, idleChecker);
+    private SocketChannel channel;
+    /* No qualifier */
+    NioTcpSession(final NioTcpServer service, final SocketChannel channel,
+            final SelectorLoop selectorLoop) {
         this.selectorLoop = selectorLoop;
-        this.configuration = new ProxyTcpSessionConfig(channel.socket());
-        sendBufferSize = configuration.getSendBufferSize();
+        sendBufferSize = 1024;
         sendBuffer = ByteBuffer.allocateDirect(sendBufferSize);
-    }
-
-    void setConnectFuture(ConnectFuture connectFuture) {
-        this.connectFuture = connectFuture;
+        this.channel = channel;
     }
 
     /**
@@ -83,13 +71,13 @@ public class NioTcpSession extends AbstractNioSession implements SelectorListene
      * @return the socket channel used by this session
      */
     SocketChannel getSocketChannel() {
-        return (SocketChannel) channel;
+        return  channel;
     }
 
     /**
      * {@inheritDoc}
      */
-    @Override
+     
     public InetSocketAddress getRemoteAddress() {
         if (channel == null) {
             return null;
@@ -106,7 +94,7 @@ public class NioTcpSession extends AbstractNioSession implements SelectorListene
     /**
      * {@inheritDoc}
      */
-    @Override
+     
     public InetSocketAddress getLocalAddress() {
         if (channel == null) {
             return null;
@@ -124,7 +112,7 @@ public class NioTcpSession extends AbstractNioSession implements SelectorListene
     /**
      * {@inheritDoc}
      */
-    @Override
+     
     public void suspendRead() {
         // TODO
         throw new RuntimeException("Not implemented");
@@ -133,7 +121,6 @@ public class NioTcpSession extends AbstractNioSession implements SelectorListene
     /**
      * {@inheritDoc}
      */
-    @Override
     public void suspendWrite() {
         // TODO
         throw new RuntimeException("Not implemented");
@@ -142,7 +129,6 @@ public class NioTcpSession extends AbstractNioSession implements SelectorListene
     /**
      * {@inheritDoc}
      */
-    @Override
     protected int writeDirect(Object message) {
         try {
             // Check that we can write into the channel
@@ -163,8 +149,8 @@ public class NioTcpSession extends AbstractNioSession implements SelectorListene
     /**
      * {@inheritDoc}
      */
-    @Override
-    protected ByteBuffer convertToDirectBuffer(WriteRequest writeRequest, boolean createNew) {
+     
+   /* protected ByteBuffer convertToDirectBuffer(WriteRequest writeRequest, boolean createNew) {
         ByteBuffer message = (ByteBuffer) writeRequest.getMessage();
 
         if (!message.isDirect()) {
@@ -188,75 +174,30 @@ public class NioTcpSession extends AbstractNioSession implements SelectorListene
         }
 
         return message;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void resumeRead() {
-        // TODO
-        throw new RuntimeException("Not implemented");
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void resumeWrite() {
-        // TODO
-        throw new RuntimeException("Not implemented");
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean isReadSuspended() {
-        // TODO
-        return false;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean isWriteSuspended() {
-        // TODO
-        throw new RuntimeException("Not implemented");
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public TcpSessionConfig getConfig() {
-        return configuration;
-    }
+    }*/
 
     /**
      * Set this session status as connected. To be called by the processor selecting/polling this session.
      */
     void setConnected() {
-        if (!isCreated()) {
-            throw new RuntimeException("Trying to open a non created session");
-        }
-
-        state = SessionState.CONNECTED;
-
-        if (connectFuture != null) {
-            connectFuture.complete(this);
-            // free some memory
-            connectFuture = null;
-        }
-
-        processSessionOpen();
+//        if (!isCreated()) {
+//            throw new RuntimeException("Trying to open a non created session");
+//        }
+//
+//        state = SessionState.CONNECTED;
+//
+//        if (connectFuture != null) {
+//            connectFuture.complete(this);
+//            // free some memory
+//            connectFuture = null;
+//        }
+//
+//        processSessionOpen();
     }
 
     /**
      * {@inheritDoc}
      */
-    @Override
     protected void channelClose() {
         try {
             selectorLoop.unregister(this, channel);
@@ -270,7 +211,6 @@ public class NioTcpSession extends AbstractNioSession implements SelectorListene
     /**
      * {@inheritDoc}
      */
-    @Override
     public void flushWriteQueue() {
         // register for write
         selectorLoop.modifyRegistration(false, !isReadSuspended(), true, this, channel, true);
@@ -300,28 +240,13 @@ public class NioTcpSession extends AbstractNioSession implements SelectorListene
                 // push to the chain
                 readBuffer.flip();
 
-                if (isSecured()) {
-                    // We are reading data over a SSL/TLS encrypted connection.
-                    // Redirect the processing to the SslHelper class.
-                    final SslHelper sslHelper = getAttribute(SSL_HELPER, null);
-
-                    if (sslHelper == null) {
-                        throw new IllegalStateException();
-                    }
-
-                    sslHelper.processRead(this, readBuffer);
-
-                    // We don't clear the buffer. It has been done by the sslHelper
-                } else {
+                
                     // Plain message, not encrypted : go directly to the chain
                     processMessageReceived(readBuffer);
 
                     // And now, clear the buffer
                     readBuffer.clear();
-                }
-
-                // Update the session idle status
-                idleChecker.sessionRead(this, System.currentTimeMillis());
+        
             }
         } catch (final IOException e) {
             LOG.error("Exception while reading : ", e);
@@ -329,42 +254,41 @@ public class NioTcpSession extends AbstractNioSession implements SelectorListene
         }
     }
 
+    boolean isWritable = false;
+    boolean isReadble = false;
     /**
      * {@inheritDoc}
      */
-    @Override
     public void ready(final boolean accept, boolean connect, final boolean read, final ByteBuffer readBuffer,
             final boolean write) {
         if (LOG.isDebugEnabled()) {
             LOG.debug("session {} ready for accept={}, connect={}, read={}, write={}", new Object[] { this, accept,
                                     connect, read, write });
         }
+        isWritable = write;
+        isReadble = read;
         if (connect) {
-            try {
+			try {
 
-                boolean isConnected = ((SocketChannel) channel).finishConnect();
+				boolean isConnected = ((SocketChannel) channel).finishConnect();
 
-                if (!isConnected) {
-                    LOG.error("unable to connect session {}", this);
-                } else {
-                    // cancel current registration for connection
-                    selectionKey.cancel();
-                    selectionKey = null;
+				if (!isConnected) {
+					LOG.error("unable to connect session {}", this);
+				} else {
+					// cancel current registration for connection
+					selectionKey.cancel();
+					selectionKey = null;
 
-                    // Register for reading
-                    selectorLoop.register(false, false, true, false, this, channel, new RegistrationCallback() {
-
-                        @Override
-                        public void done(SelectionKey selectionKey) {
-                            setConnected();
-                        }
-                    });
-                }
+					// Register for reading
+					selectorLoop.register(false, false, true, false, this,
+							channel, new RegistrationCallback() {
+								public void done(SelectionKey selectionKey) {
+									setConnected();
+								}
+							});
+				}
             } catch (IOException e) {
                 LOG.debug("Connection error, we cancel the future", e);
-                if (connectFuture != null) {
-                    connectFuture.error(e);
-                }
             }
         }
 
@@ -383,4 +307,36 @@ public class NioTcpSession extends AbstractNioSession implements SelectorListene
     void setSelectionKey(SelectionKey key) {
         this.selectionKey = key;
     }
+
+	private void close(boolean b) {
+		channelClose();
+	}
+
+	private void processException(IOException e) {
+		e.printStackTrace();
+		close(true);
+	}
+
+	private void processWrite(SelectorLoop selectorLoop2) {
+		// TODO Auto-generated method stub
+		
+	}
+	
+	public void processMessageReceived(ByteBuffer message) {
+		ByteBuffer original = message;
+		ByteBuffer clone = ByteBuffer.allocate(original.capacity());
+		// copy from the beginning
+		original.rewind();
+		clone.put(original);
+		original.rewind();
+		clone.flip();
+	}
+
+	private boolean isReadSuspended() {
+		return isReadble;
+	}
+
+	private boolean isRegisteredForWrite() {
+		return isWritable;
+	}
 }

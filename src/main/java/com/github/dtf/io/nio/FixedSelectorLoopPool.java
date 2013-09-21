@@ -52,7 +52,6 @@ public class FixedSelectorLoopPool implements SelectorLoopPool {
     /**
      * {@inheritDoc}
      */
-    @Override
     public SelectorLoop getSelectorLoop() {
         return pool[Math.abs(nextIndex.incrementAndGet() % pool.length)];
     }

@@ -102,7 +102,6 @@ public class NioSelectorLoop implements SelectorLoop {
     /**
      * {@inheritDoc}
      */
-    @Override
     public void register(boolean accept, boolean connect, boolean read, boolean write, SelectorListener listener,
             SelectableChannel channel, RegistrationCallback callback) {
         if (IS_DEBUG) {
@@ -138,7 +137,6 @@ public class NioSelectorLoop implements SelectorLoop {
     /**
      * {@inheritDoc}
      */
-    @Override
     public void modifyRegistration(boolean accept, boolean read, boolean write, final SelectorListener listener,
             SelectableChannel channel, boolean wakeup) {
         if (IS_DEBUG) {
@@ -178,7 +176,6 @@ public class NioSelectorLoop implements SelectorLoop {
     /**
      * {@inheritDoc}
      */
-    @Override
     public void unregister(final SelectorListener listener, final SelectableChannel channel) {
         if (IS_DEBUG) {
             LOG.debug("unregistering : {}", listener);
@@ -269,7 +266,6 @@ public class NioSelectorLoop implements SelectorLoop {
         }
     }
 
-    @Override
     public void wakeup() {
         selector.wakeup();
     }
