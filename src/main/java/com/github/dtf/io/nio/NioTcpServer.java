@@ -79,15 +79,15 @@ public class NioTcpServer implements SelectorListener {
 		socketChannel.configureBlocking(false);
 		final NioTcpSession session = new NioTcpSession(this, socketChannel, readWriteSelectorLoop);
 
-		readWriteSelectorLoop.register(false, false, true, false, session, socketChannel, new Handler());
+		readWriteSelectorLoop.register(false, false, true, false, session, socketChannel, cb);
 	}
 	
-//	private void doAccept(Socket socket){
-//		readWriteSelectorPool.getSelectorLoop().register(false, false, true, true, this, channel, callback)
-//	}
-	public class Handler implements RegistrationCallback{
-		public void done(SelectionKey selectionKey) {
-			System.out.println("Handler!");
-		}
+	RegistrationCallback cb = null;
+	public void registCallback(RegistrationCallback callBack){
+		cb = callBack;
+	}
+	
+	public void start() {
+		bind(address);
 	}
 }
