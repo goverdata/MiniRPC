@@ -117,7 +117,7 @@ public class CalculatorService implements Calculator {
 	}
 
 	public void createServer(Class pbProtocol, BlockingService service) {
-		server = new Server(pbProtocol, service, port);
+		server = new Server(pbProtocol, service, host, port);
 		server.start();
 	}
 

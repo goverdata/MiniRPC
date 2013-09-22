@@ -1,10 +1,7 @@
 package com.github.dtf.rpc.server;
 
-import java.net.InetSocketAddress;
 import java.net.ServerSocket;
-import java.net.SocketAddress;
 
-import com.github.dtf.io.nio.NioTcpServer;
 import com.google.protobuf.BlockingService;
 
 public class Server {
@@ -13,14 +10,15 @@ public class Server {
 	private ServerSocket ss;
 	private Listener listener;
 	private Handler handler;
-	private String host = "localhost";
-//	private int port = 3333;
+	private String host;
+	private int port;
 	private byte[] dataBuffer;
 	
-	public Server(Class<?> protocol, BlockingService protocolImpl, int port) {
+	public Server(Class<?> protocol, BlockingService protocolImpl, String host, int port) {
 		this.protocol = protocol;
 		this.impl = protocolImpl;
-//		this.port = port;
+		this.host = host;
+		this.port = port;
 //		SocketAddress add = new InetSocketAddress(host, port);
 		listener = new Listener(this, host, port);
 		handler = new Handler(this);
