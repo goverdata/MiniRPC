@@ -15,10 +15,12 @@ public class Handler extends Thread{
 	}
 	
 	public void run(){
-		while(server.getDataBuffer() != null && server.getDataBuffer().length > 0){
+		while(true){
 			try {
-				processOneRpc(server.getDataBuffer());
-				
+				if(server.getDataBuffer() != null && server.getDataBuffer().length > 0){
+					System.out.println("Handler catch the msg from Reader!");
+					processOneRpc(server.getDataBuffer());
+				}
 			} catch (Exception e) {
 				e.printStackTrace();
 			}

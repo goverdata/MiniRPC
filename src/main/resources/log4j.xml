@@ -13,7 +13,7 @@
 	</appender>
 
 	<logger name="com.github.dtf" additivity="false">
-		<level value="debug" />
+		<level value="info" />
 		<appender-ref ref="stdout" />
 	</logger>
 
@@ -28,7 +28,7 @@
 
 	<!-- Root Logger -->
 	<root>
-		<level value="debug" />
+		<level value="info" />
 		<appender-ref ref="stdout" />
 	</root>
 

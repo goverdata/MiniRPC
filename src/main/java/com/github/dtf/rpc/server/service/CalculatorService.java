@@ -121,8 +121,9 @@ public class CalculatorService implements Calculator {
 		server.start();
 	}
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws InterruptedException {
 		CalculatorService cs = new CalculatorService();
 		cs.init();
+		Thread.sleep(100000);
 	}
 }
