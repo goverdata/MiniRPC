@@ -11,7 +11,7 @@ public class Server {
 	private Class<?> protocol;
 	private BlockingService impl;
 	private ServerSocket ss;
-	private NioTcpServer listener;
+	private Listener listener;
 	private Handler handler;
 	private String host = "localhost";
 //	private int port = 3333;
@@ -21,8 +21,8 @@ public class Server {
 		this.protocol = protocol;
 		this.impl = protocolImpl;
 //		this.port = port;
-		SocketAddress add = new InetSocketAddress(host, port);
-		listener = new NioTcpServer(this, add);
+//		SocketAddress add = new InetSocketAddress(host, port);
+		listener = new Listener(this, host, port);
 		handler = new Handler(this);
 	}
 
