@@ -1,5 +1,6 @@
 package com.github.dtf.rpc.server;
 
+import com.github.dtf.rpc.Call;
 import com.github.dtf.rpc.proto.CalculatorMsg.RequestProto;
 import com.google.protobuf.BlockingService;
 import com.google.protobuf.Message;
@@ -17,9 +18,13 @@ public class Handler extends Thread{
 	public void run(){
 		while(true){
 			try {
-				if(server.getDataBuffer() != null && server.getDataBuffer().length > 0){
+				if(server.getRequestQueue().size() > 0){
 					System.out.println("Handler catch the msg from Reader!");
-					processOneRpc(server.getDataBuffer());
+					Call newCall = server.getRequestQueue().remove();
+					byte[] request = newCall.getRequestBuffer();
+					byte[] response = processOneRpc(request);
+					newCall.setReponseBuffer(response);
+					server.getResponseQueue().add(newCall);
 				}
 			} catch (Exception e) {
 				e.printStackTrace();

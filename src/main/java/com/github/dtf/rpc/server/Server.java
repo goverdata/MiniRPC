@@ -1,7 +1,10 @@
 package com.github.dtf.rpc.server;
 
 import java.net.ServerSocket;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
+import com.github.dtf.rpc.Call;
 import com.google.protobuf.BlockingService;
 
 public class Server {
@@ -10,18 +13,23 @@ public class Server {
 	private ServerSocket ss;
 	private Listener listener;
 	private Handler handler;
+	private Responder responder;
 	private String host;
 	private int port;
 	private byte[] dataBuffer;
-	
+	private ConcurrentLinkedQueue<Call> requestQueue;
+	private ConcurrentLinkedQueue<Call> reponseQueue;
 	public Server(Class<?> protocol, BlockingService protocolImpl, String host, int port) {
 		this.protocol = protocol;
 		this.impl = protocolImpl;
 		this.host = host;
 		this.port = port;
+		requestQueue = new ConcurrentLinkedQueue<Call>();
+		reponseQueue = new ConcurrentLinkedQueue<Call>();
 //		SocketAddress add = new InetSocketAddress(host, port);
 		listener = new Listener(this, host, port);
 		handler = new Handler(this);
+		responder = new Responder(this);
 	}
 
 	/*public void run() {
@@ -66,6 +74,7 @@ public class Server {
 		listener.registCallback(new Reader(this));
 		listener.start();
 		handler.start();
+		responder.start();
 		// handlers = new Handler[handlerCount];
 		//
 		// for (int i = 0; i < handlerCount; i++) {
@@ -90,9 +99,27 @@ public class Server {
 
 	public void setDataBuffer(byte[] dataBuffer) {
 		this.dataBuffer = dataBuffer;
+////		this.dataBuffer = new byte[length];
+//		System.arraycopy(dataBuffer, 0, this.dataBuffer, 0, length);
 	}
 
 	public BlockingService getBlockingService() {
 		return impl;
+	}
+
+	public ConcurrentLinkedQueue<Call> getRequestQueue() {
+		return requestQueue;
+	}
+
+	public void setRequestQueue(ConcurrentLinkedQueue<Call> callQueue) {
+		this.requestQueue = callQueue;
+	}
+	
+	public ConcurrentLinkedQueue<Call> getResponseQueue() {
+		return reponseQueue;
+	}
+	
+	public void setResponseQueue(ConcurrentLinkedQueue<Call> callQueue) {
+		this.reponseQueue = callQueue;
 	}
 }

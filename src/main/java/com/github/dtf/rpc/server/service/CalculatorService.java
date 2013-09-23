@@ -6,11 +6,13 @@ import java.lang.reflect.Method;
 
 import com.github.dtf.rpc.protocol.Calculator;
 import com.github.dtf.rpc.server.Server;
+import com.github.dtf.rpc.server.Server1;
 
 import com.google.protobuf.BlockingService;
 
 public class CalculatorService implements Calculator {
 
+//	private Server1 server = null;
 	private Server server = null;
 	private final Class protocol = Calculator.class;
 	private final ClassLoader classLoader = Thread.currentThread()
@@ -118,6 +120,7 @@ public class CalculatorService implements Calculator {
 
 	public void createServer(Class pbProtocol, BlockingService service) {
 		server = new Server(pbProtocol, service, host, port);
+//		server = new Server1(pbProtocol, service, port);
 		server.start();
 	}
 
