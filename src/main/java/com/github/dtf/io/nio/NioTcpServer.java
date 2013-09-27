@@ -3,7 +3,6 @@ package com.github.dtf.io.nio;
 import java.io.IOException;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
-import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
@@ -20,8 +19,8 @@ public class NioTcpServer implements SelectorListener {
 	
 	Server server;
 	Selector selector;
-	// the key used for selecting accept event
-    private SelectionKey acceptKey = null;
+//	// the key used for selecting accept event
+//    private SelectionKey acceptKey = null;
 
     // the server socket for accepting clients
     private ServerSocketChannel serverChannel = null;
@@ -74,12 +73,17 @@ public class NioTcpServer implements SelectorListener {
 	}
 
 	private void createSession(SocketChannel clientSocket) throws IOException {
-		SocketChannel socketChannel = clientSocket;
+		//SocketChannel socketChannel = clientSocket;
 		SelectorLoop readWriteSelectorLoop = readWriteSelectorPool.getSelectorLoop();
-		socketChannel.configureBlocking(false);
-		final NioTcpSession session = new NioTcpSession(this, socketChannel, readWriteSelectorLoop);
-
-		readWriteSelectorLoop.register(false, false, true, false, session, socketChannel, cb);
+		clientSocket.configureBlocking(false);
+		final NioTcpSession session = new NioTcpSession(this, clientSocket, readWriteSelectorLoop);
+		session.registeredMessageHandler(msgHandler);
+		readWriteSelectorLoop.register(false, false, true, false, session, clientSocket, cb);
+	}
+	
+	MessageHandler msgHandler = null;
+	public void registMessageHandler(MessageHandler callBack){
+		msgHandler = callBack;
 	}
 	
 	RegistrationCallback cb = null;

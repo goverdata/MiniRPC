@@ -1,43 +1,42 @@
 package com.github.dtf.rpc.server;
 
-import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
 
-import com.github.dtf.io.nio.RegistrationCallback;
+import com.github.dtf.io.nio.MessageHandler;
 import com.github.dtf.rpc.Call;
 
-public class Reader implements RegistrationCallback{
+public class Reader implements MessageHandler {
 	Server server;
-	public Reader(Server svc){
+
+	public Reader(Server svc) {
 		server = svc;
 	}
-	
-	public void done(SelectionKey selectionKey) {
+
+	public void processMessage(SocketChannel channel, ByteBuffer message) {
+		System.out.println("Server get request:" + System.currentTimeMillis());
 		System.out.println("Reader!");
-		SocketChannel channel = (SocketChannel) selectionKey.channel();  
-        ByteBuffer buffer = ByteBuffer.allocate(1024);  
-        try {
-			channel.read(buffer);
-			buffer.position(0);
-			int length = buffer.getInt();
-			byte[] data = new byte[length];
-			buffer.get(data, 0, length);
-			//String msg = new String(data).trim();  
-			//System.out.println("Server receive message："+msg);  
-			//server.setDataBuffer(data);
-			Call newCall = new Call();
-			newCall.setClientChannel(channel);
-			newCall.setRequestBuffer(data);
-			server.getRequestQueue().add(newCall);
-			System.out.println("Reader put the data to server's buffer");  
-			/*ByteBuffer outBuffer = ByteBuffer.wrap(msg.getBytes());  
-			channel.write(outBuffer);*/
-			System.out.println("Reader Done!");
-		} catch (IOException e) {
-			e.printStackTrace();
-		}  
+		// System.out.println("Server start read data:" +
+		// System.currentTimeMillis());
+		// channel.read(buffer);
+		// System.out.println("Server read data end:" +
+		// System.currentTimeMillis());
+		// buffer.position(0);
+		int length = message.getInt();
+		byte[] data = new byte[length];
+		message.get(data, 0, length);
+		// if(length == 0 || data == null || data.length <= 0){
+		// System.out.println("Reader : request data length:" + length);
+		// System.out.println("Reader : request data is empty, return.");
+		// return;
+		// }
+		Call newCall = new Call();
+		newCall.setClientChannel(channel);
+		newCall.setRequestBuffer(data);
+		server.getRequestQueue().add(newCall);
+		System.out.println("Reader put the data to server's buffer:"
+				+ newCall.toString());
+		System.out.println("Reader Done!");
 	}
 
 }

@@ -3,6 +3,7 @@ package com.github.dtf.rpc.server;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 
+import com.github.dtf.io.nio.MessageHandler;
 import com.github.dtf.io.nio.NioTcpServer;
 
 public class Listener extends Thread{
@@ -20,8 +21,8 @@ public class Listener extends Thread{
 		listener.start();
 	}
 
-	public void registCallback(Reader reader) {
-		listener.registCallback(reader);
+	public void registMessageHandler(MessageHandler reader) {
+		listener.registMessageHandler(reader);
 	}
 
 }

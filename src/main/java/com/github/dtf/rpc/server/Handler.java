@@ -21,6 +21,7 @@ public class Handler extends Thread{
 				if(server.getRequestQueue().size() > 0){
 					System.out.println("Handler catch the msg from Reader!");
 					Call newCall = server.getRequestQueue().remove();
+					System.out.println("Handler call info :" + newCall.toString());
 					byte[] request = newCall.getRequestBuffer();
 					byte[] response = processOneRpc(request);
 					newCall.setReponseBuffer(response);

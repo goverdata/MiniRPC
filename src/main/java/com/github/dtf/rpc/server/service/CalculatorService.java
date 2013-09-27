@@ -120,13 +120,12 @@ public class CalculatorService implements Calculator {
 
 	public void createServer(Class pbProtocol, BlockingService service) {
 		server = new Server(pbProtocol, service, host, port);
-//		server = new Server1(pbProtocol, service, port);
 		server.start();
 	}
 
 	public static void main(String[] args) throws InterruptedException {
 		CalculatorService cs = new CalculatorService();
 		cs.init();
-		Thread.sleep(100000);
+		Thread.sleep(1000000);
 	}
 }

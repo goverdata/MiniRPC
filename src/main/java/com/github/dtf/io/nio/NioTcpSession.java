@@ -56,6 +56,9 @@ public class NioTcpSession implements SelectorListener {
     private int sendBufferSize;
 
     private SocketChannel channel;
+    
+    MessageHandler msgHandler;
+    
     /* No qualifier */
     NioTcpSession(final NioTcpServer service, final SocketChannel channel,
             final SelectorLoop selectorLoop) {
@@ -323,6 +326,10 @@ public class NioTcpSession implements SelectorListener {
 	}
 	
 	public void processMessageReceived(ByteBuffer message) {
+		if(msgHandler!=null){
+			msgHandler.processMessage(channel, message);
+			return;
+		}
 		ByteBuffer original = message;
 		ByteBuffer clone = ByteBuffer.allocate(original.capacity());
 		// copy from the beginning
@@ -338,5 +345,9 @@ public class NioTcpSession implements SelectorListener {
 
 	private boolean isRegisteredForWrite() {
 		return isWritable;
+	}
+	
+	public void registeredMessageHandler(MessageHandler handler) {
+		this.msgHandler = handler;
 	}
 }

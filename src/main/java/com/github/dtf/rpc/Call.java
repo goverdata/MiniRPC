@@ -26,4 +26,18 @@ public class Call {
 	public void setReponseBuffer(byte[] reponseBuffer) {
 		this.reponseBuffer = reponseBuffer;
 	}
+	
+	public String toString(){
+		StringBuilder sb = new StringBuilder();
+		if(clientChannel != null){
+			sb.append("Rpc request from:" + clientChannel.socket().getRemoteSocketAddress() + "]");
+		}
+		if(requestBuffer != null){
+			sb.append(" [request data:" + new String(requestBuffer) + "]");
+		}
+		if(reponseBuffer != null){
+			sb.append(" [response data:" + new String(reponseBuffer)+ "]");
+		}
+		return sb.toString();
+	}
 }
