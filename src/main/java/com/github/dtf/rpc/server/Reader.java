@@ -16,20 +16,9 @@ public class Reader implements MessageHandler {
 	public void processMessage(SocketChannel channel, ByteBuffer message) {
 		System.out.println("Server get request:" + System.currentTimeMillis());
 		System.out.println("Reader!");
-		// System.out.println("Server start read data:" +
-		// System.currentTimeMillis());
-		// channel.read(buffer);
-		// System.out.println("Server read data end:" +
-		// System.currentTimeMillis());
-		// buffer.position(0);
 		int length = message.getInt();
 		byte[] data = new byte[length];
 		message.get(data, 0, length);
-		// if(length == 0 || data == null || data.length <= 0){
-		// System.out.println("Reader : request data length:" + length);
-		// System.out.println("Reader : request data is empty, return.");
-		// return;
-		// }
 		Call newCall = new Call();
 		newCall.setClientChannel(channel);
 		newCall.setRequestBuffer(data);

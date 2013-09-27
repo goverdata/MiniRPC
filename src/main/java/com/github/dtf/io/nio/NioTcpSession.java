@@ -242,14 +242,11 @@ public class NioTcpSession implements SelectorListener {
                 // limit at the current position & rewind buffer back to start &
                 // push to the chain
                 readBuffer.flip();
+                // Plain message, not encrypted : go directly to the chain
+                processMessageReceived(readBuffer);
 
-                
-                    // Plain message, not encrypted : go directly to the chain
-                    processMessageReceived(readBuffer);
-
-                    // And now, clear the buffer
-                    readBuffer.clear();
-        
+                // And now, clear the buffer
+                readBuffer.clear();
             }
         } catch (final IOException e) {
             LOG.error("Exception while reading : ", e);

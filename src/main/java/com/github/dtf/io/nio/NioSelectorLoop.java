@@ -232,6 +232,7 @@ public class NioSelectorLoop implements SelectorLoop {
                             boolean isConnectable = (ops & SelectionKey.OP_CONNECT) == SelectionKey.OP_CONNECT;
                             boolean isReadable = (ops & SelectionKey.OP_READ) == SelectionKey.OP_READ;
                             boolean isWritable = (ops & SelectionKey.OP_WRITE) == SelectionKey.OP_WRITE;
+                            readBuffer.clear();
                             listener.ready(isAcceptable, isConnectable, isReadable, isReadable ? readBuffer : null,
                                     isWritable);
                             // if you don't remove the event of the set, the selector will present you this event again
