@@ -18,6 +18,7 @@ public class Responder extends Thread{
 				if(server.getResponseQueue().size() > 0){
 					System.out.println("Responder catch the msg from Reader!");
 					Call newCall = server.getResponseQueue().remove();
+					System.out.println("Responder call:" + newCall);
 					byte[] result = newCall.getReponseBuffer();
 					SocketChannel channel = newCall.getClientChannel();
 					ByteBuffer buffer = ByteBuffer.allocate(4 + result.length);

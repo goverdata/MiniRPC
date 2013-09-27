@@ -35,7 +35,7 @@ public class NioTcpServer implements SelectorListener {
 		this.server = server;
 		acceptSelectorLoop = new NioSelectorLoop("Server-accept");
 		address = add;
-		readWriteSelectorPool = new FixedSelectorLoopPool("Server-rw", 2);
+		readWriteSelectorPool = new FixedSelectorLoopPool("Server-rw", 1);
 	}
 	
 	public void bind(SocketAddress address) {
