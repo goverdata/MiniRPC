@@ -18,9 +18,9 @@ public class TestCalculator implements Calculator {
         DataInputStream in = null;  
         int ret = 0;  
         try {  
-        	System.out.println("Client send complete start to connect:" + System.currentTimeMillis());
+        	System.out.println("Client start to connect:" + System.currentTimeMillis());
             s= new Socket("localhost", 8038);  
-            System.out.println("Client send completed:" + System.currentTimeMillis());
+            System.out.println("Client connect completed:" + System.currentTimeMillis());
             out = new DataOutputStream(s.getOutputStream());  
             in = new DataInputStream(s.getInputStream());  
               
@@ -35,7 +35,7 @@ public class TestCalculator implements Calculator {
             out.write(bytes);  
             out.flush();  
             System.out.println("Client send complete:" + System.currentTimeMillis());
-              
+       
             int dataLen = in.readInt();  
             byte[] data = new byte[dataLen];  
             int count = in.read(data);  

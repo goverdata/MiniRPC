@@ -20,6 +20,7 @@
 package com.github.dtf.io.nio;
 
 import java.nio.ByteBuffer;
+import java.nio.channels.SelectionKey;
 
 /**
  * Listen for selector events.
@@ -28,6 +29,6 @@ import java.nio.ByteBuffer;
  */
 public interface SelectorListener {
 
-    void ready(boolean accept, boolean connect, boolean read, ByteBuffer readBuffer, boolean write);
+    void ready(boolean accept, boolean connect, boolean read, ByteBuffer readBuffer, boolean write, SelectionKey key);
 
 }

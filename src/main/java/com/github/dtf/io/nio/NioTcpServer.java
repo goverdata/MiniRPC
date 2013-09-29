@@ -3,6 +3,7 @@ package com.github.dtf.io.nio;
 import java.io.IOException;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
+import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
@@ -53,7 +54,7 @@ public class NioTcpServer implements SelectorListener {
 	}
 
 	public void ready(boolean accept, boolean connect, boolean read,
-			ByteBuffer readBuffer, boolean write) {
+			ByteBuffer readBuffer, boolean write, SelectionKey key) {
 		if (accept) {
             LOG.debug("acceptable new client");
 
@@ -72,13 +73,13 @@ public class NioTcpServer implements SelectorListener {
         }
 	}
 
-	private void createSession(SocketChannel clientSocket) throws IOException {
+	private void createSession(SocketChannel clientChannel) throws IOException {
 		//SocketChannel socketChannel = clientSocket;
 		SelectorLoop readWriteSelectorLoop = readWriteSelectorPool.getSelectorLoop();
-		clientSocket.configureBlocking(false);
-		final NioTcpSession session = new NioTcpSession(this, clientSocket, readWriteSelectorLoop);
+		clientChannel.configureBlocking(false);
+		final NioTcpSession session = new NioTcpSession(this, clientChannel, readWriteSelectorLoop);
 		session.registeredMessageHandler(msgHandler);
-		readWriteSelectorLoop.register(false, false, true, false, session, clientSocket, cb);
+		readWriteSelectorLoop.register(false, false, true, false, session, clientChannel, cb);
 	}
 	
 	MessageHandler msgHandler = null;

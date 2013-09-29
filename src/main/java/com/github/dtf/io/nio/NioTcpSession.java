@@ -229,6 +229,7 @@ public class NioTcpSession implements SelectorListener {
             LOG.debug("readable session : {}", this);
 
             // Read everything we can up to the buffer size
+            System.out.println("Before read:" + readBuffer);
             final int readCount = ((SocketChannel) channel).read(readBuffer);
 
             LOG.debug("read {} bytes", readCount);
@@ -243,14 +244,15 @@ public class NioTcpSession implements SelectorListener {
                 // push to the chain
                 readBuffer.flip();
                 // Plain message, not encrypted : go directly to the chain
-                processMessageReceived(readBuffer);
-
-                // And now, clear the buffer
-                readBuffer.clear();
+                processMessageReceived(testChannel, readBuffer);
             }
         } catch (final IOException e) {
             LOG.error("Exception while reading : ", e);
             processException(e);
+        } finally{
+        	// And now, clear the buffer
+        	readBuffer.clear();
+        	System.out.println("Clean buffer");
         }
     }
 
@@ -259,8 +261,13 @@ public class NioTcpSession implements SelectorListener {
     /**
      * {@inheritDoc}
      */
+    
+    SocketChannel testChannel;
     public void ready(final boolean accept, boolean connect, final boolean read, final ByteBuffer readBuffer,
-            final boolean write) {
+            final boolean write, SelectionKey key) {
+    	
+    	testChannel= (SocketChannel) key.channel();
+    	
         if (LOG.isDebugEnabled()) {
             LOG.debug("session {} ready for accept={}, connect={}, read={}, write={}", new Object[] { this, accept,
                                     connect, read, write });
@@ -322,11 +329,11 @@ public class NioTcpSession implements SelectorListener {
 		
 	}
 	
-	public void processMessageReceived(ByteBuffer message) {
-		if(msgHandler!=null){
-			msgHandler.processMessage(channel, message);
-			return;
-		}
+	public void processMessageReceived(SocketChannel channel, ByteBuffer message) {
+//		if(msgHandler!=null){
+//			msgHandler.processMessage(channel, message);
+//			return;
+//		}
 		ByteBuffer original = message;
 		ByteBuffer clone = ByteBuffer.allocate(original.capacity());
 		// copy from the beginning
@@ -334,6 +341,9 @@ public class NioTcpSession implements SelectorListener {
 		clone.put(original);
 		original.rewind();
 		clone.flip();
+		if(msgHandler!=null){
+			msgHandler.processMessage(channel, clone);
+		}
 	}
 
 	private boolean isReadSuspended() {
