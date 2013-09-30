@@ -1,14 +1,20 @@
 package com.github.dtf.rpc.server;
 
-import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 
+import org.mortbay.log.Log;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.github.dtf.io.nio.MessageHandler;
+import com.github.dtf.io.nio.NioTcpServer;
 import com.github.dtf.rpc.Call;
 import com.github.dtf.utils.ByteUtils;
 
 public class Reader implements MessageHandler {
+	boolean ISDEBUG = Log.isDebugEnabled();
+	static final Logger LOG = LoggerFactory.getLogger(NioTcpServer.class);
 	Server server;
 
 	public Reader(Server svc) {
@@ -16,33 +22,17 @@ public class Reader implements MessageHandler {
 	}
 
 	public void processMessage(SocketChannel channel, ByteBuffer message) {
-		System.out.println("Server get request:" + System.currentTimeMillis());
-		System.out.println("Reader!");
-		ByteUtils.printBytes(message.array());
-		if(message.limit() < 4){
-			System.out.println(message);
-			return ;
+		if(ISDEBUG){
+			LOG.debug("Server get request:" + System.currentTimeMillis());
+			ByteUtils.printBytes(message.array());
 		}
 		int length = message.getInt();
 		byte[] data = new byte[length];
 		message.get(data, 0, length);
 		Call newCall = new Call();
 		newCall.setClientChannel(channel);
-		
-//		
-//		try {
-//			channel.write(message);
-//		} catch (IOException e) {
-//			e.printStackTrace();
-//		}
-		
-		
-		
 		newCall.setRequestBuffer(data);
 		server.getRequestQueue().add(newCall);
-		System.out.println("Reader put the data to server's buffer:"
-				+ newCall.toString());
-		System.out.println("Reader Done!");
 	}
 
 }
